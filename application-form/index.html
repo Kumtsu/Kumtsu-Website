@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050705">
+  <meta name="description" content="แบบฟอร์มสมัครงาน บริษัท คุ้มสึ จำกัด ร่วมเติบโตไปกับทีมคุ้มสึ">
+  <title>แบบฟอร์มสมัครงาน | Kumtsu Group</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23070907'/%3E%3Cpath d='M15 15h34v10H33l16 24H36L25 31v18H15z' fill='%231ca650'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --ink: #111611;
+      --surface: #ffffff;
+      --surface-2: #f5f7f4;
+      --paper: #111611;
+      --green: #1ca650;
+      --green-bright: #32cf6b;
+      --muted: #667067;
+      --line: #dce2dc;
+      --danger: #b83026;
+      --max: 1120px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--paper);
+      background: #ffffff;
+      font-family: "Thonburi", "Noto Sans Thai", "Leelawadee UI", system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font: inherit; }
+    .wrap { width: min(calc(100% - 40px), var(--max)); margin-inline: auto; }
+    .topbar { height: 76px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.92); backdrop-filter: blur(14px); }
+    .topbar-inner { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { display: inline-flex; align-items: center; gap: 12px; font-weight: 900; letter-spacing: .04em; }
+    .brand-logo { width: 44px; height: 44px; overflow: hidden; border: 1px solid rgba(255,255,255,.2); border-radius: 12px; background: #000; }
+    .brand-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .brand small { display: block; margin-top: -4px; color: var(--muted); font-size: .6rem; letter-spacing: .18em; }
+    .back-link { display: inline-flex; align-items: center; gap: 9px; min-height: 42px; padding: 0 15px; border: 1px solid #cbd3cb; border-radius: 999px; color: #243026; font-size: .9rem; font-weight: 800; transition: .2s ease; }
+    .back-link:hover, .back-link:focus-visible { border-color: var(--green); color: var(--green-bright); outline: none; }
+    main { padding: clamp(46px, 7vw, 88px) 0 90px; }
+    .intro { display: grid; grid-template-columns: .8fr 1.2fr; gap: clamp(32px, 6vw, 84px); align-items: start; margin-bottom: 38px; }
+    .eyebrow { display: flex; align-items: center; gap: 11px; color: var(--green-bright); font-size: .78rem; font-weight: 900; letter-spacing: .15em; text-transform: uppercase; }
+    .eyebrow::before { content: ""; width: 32px; height: 2px; background: currentColor; }
+    h1 { max-width: 720px; margin: 14px 0 18px; font-size: clamp(2.5rem, 6vw, 5rem); line-height: 1.03; letter-spacing: -.045em; }
+    .intro-copy { max-width: 650px; margin: 0; color: #505b51; font-size: clamp(1rem, 1.6vw, 1.18rem); }
+    .steps { list-style: none; display: grid; gap: 12px; margin: 8px 0 0; padding: 0; counter-reset: step; }
+    .steps li { display: grid; grid-template-columns: 36px 1fr; gap: 12px; align-items: center; color: #364137; font-size: .92rem; }
+    .steps li::before { counter-increment: step; content: counter(step); width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid rgba(50,207,107,.5); border-radius: 50%; color: var(--green-bright); font-weight: 900; }
+    .form-shell { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 18px; align-items: start; }
+    .form-card, .aside-card { border: 1px solid var(--line); border-radius: 24px; background: rgba(255,255,255,.97); box-shadow: 0 24px 70px rgba(27,45,30,.1); }
+    .form-card { padding: clamp(24px, 4vw, 46px); }
+    .aside-card { position: sticky; top: 20px; padding: 24px; }
+    .aside-card h2 { margin: 0 0 10px; font-size: 1.08rem; color: var(--green-bright); }
+    .aside-card p { margin: 0; color: #59635a; font-size: .9rem; }
+    .aside-card p + p { margin-top: 14px; }
+    .aside-contact { display: block; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); color: #172219; font-weight: 850; }
+    .aside-contact span { display: block; color: var(--muted); font-size: .78rem; font-weight: 700; }
+    .form-heading { margin: 0 0 6px; font-size: clamp(1.45rem, 3vw, 2rem); }
+    .required-note { margin: 0 0 28px; color: var(--muted); font-size: .88rem; }
+    .required-note strong, .required { color: var(--green-bright); }
+    .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 22px 18px; }
+    .field { display: grid; gap: 8px; }
+    .field-full { grid-column: 1 / -1; }
+    label, legend { color: #202921; font-size: .94rem; font-weight: 850; }
+    input, select, textarea {
+      width: 100%; min-height: 50px; padding: 12px 14px; border: 1px solid #cbd3cb; border-radius: 12px;
+      color: #152017; background: #fff; outline: none; transition: border-color .2s ease, box-shadow .2s ease;
+    }
+    textarea { min-height: 120px; resize: vertical; }
+    input:focus, select:focus, textarea:focus { border-color: var(--green-bright); box-shadow: 0 0 0 3px rgba(50,207,107,.15); }
+    input::placeholder, textarea::placeholder { color: #8a938b; }
+    select { color-scheme: light; }
+    input[type="file"] { padding: 9px; color: #59635a; }
+    input[type="file"]::file-selector-button { min-height: 32px; margin-right: 12px; padding: 0 13px; border: 0; border-radius: 8px; color: #041006; background: var(--green-bright); font-weight: 900; cursor: pointer; }
+    .hint { color: var(--muted); font-size: .8rem; }
+    .error { min-height: 1.1em; color: var(--danger); font-size: .8rem; }
+    .consent { grid-column: 1 / -1; display: grid; grid-template-columns: 22px 1fr; gap: 11px; align-items: start; margin-top: 4px; padding: 17px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-2); }
+    .consent input { width: 20px; min-height: 20px; margin: 2px 0 0; accent-color: var(--green); }
+    .consent label { font-size: .87rem; font-weight: 650; color: #465047; }
+    .actions { grid-column: 1 / -1; display: flex; align-items: center; flex-wrap: wrap; gap: 14px; margin-top: 4px; }
+    .submit { min-height: 52px; padding: 0 26px; border: 1px solid var(--green-bright); border-radius: 999px; color: #041006; background: var(--green-bright); font-weight: 900; cursor: pointer; transition: transform .2s ease, filter .2s ease; }
+    .submit:hover { transform: translateY(-2px); filter: brightness(1.06); }
+    .submit:focus-visible { outline: 3px solid rgba(50,207,107,.3); outline-offset: 3px; }
+    .submit-note { max-width: 420px; color: var(--muted); font-size: .8rem; }
+    .result { display: none; margin-top: 28px; padding: 22px; border: 1px solid rgba(50,207,107,.55); border-radius: 16px; background: rgba(28,166,80,.09); }
+    .result.is-visible { display: block; }
+    .result h2 { margin: 0 0 8px; font-size: 1.28rem; color: var(--green-bright); }
+    .result p { margin: 0 0 16px; color: #465047; }
+    .result-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .result-link { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 16px; border: 1px solid #bdc7be; border-radius: 999px; font-size: .87rem; font-weight: 850; }
+    .result-link.primary { color: #041006; background: var(--green-bright); border-color: var(--green-bright); }
+    .privacy { margin-top: 24px; color: #707a71; font-size: .78rem; }
+    .contact-footer { margin-top: 20px; padding: 64px 0 30px; color: #f5f3ec; background: #000; }
+    .contact-footer-grid { display: grid; grid-template-columns: 1.05fr .75fr 1.05fr; gap: 14px; }
+    .contact-footer-card { min-height: 154px; padding: 20px 22px; border: 1px solid rgba(255,255,255,.18); border-radius: 18px; background: #0b0d0b; }
+    .contact-company { display: flex; align-items: flex-start; gap: 15px; }
+    .contact-company-logo { flex: 0 0 64px; width: 64px; height: 64px; overflow: hidden; border: 1px solid rgba(255,255,255,.42); border-radius: 50%; background: #000; }
+    .contact-company-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .contact-company p, .contact-footer-card p { margin: 0; color: #d4d5d1; line-height: 1.65; }
+    .contact-footer-card h2 { margin: 0 0 12px; color: var(--green-bright); font-size: .92rem; }
+    .contact-footer-card strong { display: block; margin-bottom: 5px; font-size: 1.05rem; }
+    .contact-channels { grid-column: 1 / -1; min-height: auto; padding: 20px 22px; border-color: rgba(255,255,255,.28); border-radius: 26px; background: rgba(9,11,9,.96); }
+    .contact-channels h2 { margin-bottom: 14px; font-size: 1.05rem; }
+    .contact-pills { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+    .contact-pill { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 58px; padding: 7px 14px 7px 9px; border: 1px solid rgba(255,255,255,.28); border-radius: 999px; background: linear-gradient(135deg, #252725, #171917); color: #fff; font-size: .84rem; font-weight: 800; transition: .2s ease; }
+    .contact-pill:hover, .contact-pill:focus-visible { border-color: var(--green); color: var(--green-bright); transform: translateY(-1px); outline: none; }
+    .contact-label { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
+    .contact-icon { flex: 0 0 38px; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 14px; color: #fff; background: var(--green); }
+    .contact-icon svg { width: 20px; height: 20px; fill: currentColor; }
+    .contact-icon img { width: 21px; height: 21px; object-fit: contain; }
+    .contact-copy { display: grid; min-width: 0; line-height: 1.12; }
+    .contact-copy strong { margin: 0; color: #fff; font-size: .92rem; white-space: nowrap; }
+    .contact-copy small { margin-top: 3px; color: #e2e3df; font-size: .77rem; font-weight: 700; white-space: nowrap; }
+    .contact-phone .contact-icon { background: #18a84e; }
+    .contact-line .contact-icon { background: #06c755; }
+    .contact-facebook .contact-icon { background: #1877f2; }
+    .contact-instagram .contact-icon { background: radial-gradient(circle at 31% 100%, #ffd600 0 15%, #ff7a00 30%, #ff0169 52%, #d300c5 70%, #7638fa 100%); }
+    .contact-tiktok .contact-icon { background: #090909; border: 1px solid #555; }
+    .contact-arrow { color: var(--green-bright); font-size: 1rem; }
+    .contact-bottom { display: flex; justify-content: space-between; gap: 24px; align-items: center; margin-top: 28px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,.14); color: #aaa99f; font-size: .8rem; }
+    @media (max-width: 860px) {
+      .intro, .form-shell { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: repeat(3, 1fr); }
+      .steps li { grid-template-columns: 34px 1fr; }
+      .aside-card { position: static; }
+      .contact-footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 620px) {
+      .wrap { width: min(calc(100% - 28px), var(--max)); }
+      .brand > span:last-child { display: none; }
+      .back-link { padding-inline: 13px; font-size: .82rem; }
+      .steps { grid-template-columns: 1fr; }
+      .fields { grid-template-columns: 1fr; }
+      .field-full, .consent, .actions { grid-column: auto; }
+      .form-card { border-radius: 18px; }
+      .actions { align-items: stretch; flex-direction: column; }
+      .submit { width: 100%; }
+      .contact-footer-grid, .contact-pills { grid-template-columns: 1fr; }
+      .contact-channels { grid-column: auto; }
+      .contact-bottom { align-items: flex-start; flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="../#top" aria-label="กลับหน้าหลักคุ้มสึ กรุ๊ป">
+        <span class="brand-logo"><img src="https://kumtsu-group-profile.kumtsu-7034.chatgpt.site/assets/kumtsu.png" alt="" width="44" height="44"></span>
+        <span>คุ้มสึ<small>KUMTSU GROUP</small></span>
+      </a>
+      <a class="back-link" href="../#contact"><span aria-hidden="true">←</span> กลับหน้าบริษัท</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <section class="intro" aria-labelledby="pageTitle">
+        <div>
+          <div class="eyebrow">Join our team</div>
+          <h1 id="pageTitle">แบบฟอร์ม<br>สมัครงาน</h1>
+          <p class="intro-copy">กรอกข้อมูลเพื่อเตรียมใบสมัครสำหรับตำแหน่งที่คุณสนใจ ทีมทรัพยากรบุคคลจะใช้ข้อมูลนี้เพื่อประกอบการพิจารณาเบื้องต้น</p>
+        </div>
+        <ol class="steps" aria-label="ขั้นตอนการสมัครงาน">
+          <li>กรอกข้อมูลให้ครบถ้วน</li>
+          <li>แนบเรซูเม่ไม่เกิน 4 MB</li>
+          <li>ส่งต่อให้ฝ่ายบุคคลทาง LINE</li>
+        </ol>
+      </section>
+
+      <div class="form-shell">
+        <section class="form-card" aria-labelledby="formTitle">
+          <h2 class="form-heading" id="formTitle">ข้อมูลผู้สมัคร</h2>
+          <p class="required-note">ช่องที่มีเครื่องหมาย <strong>*</strong> จำเป็นต้องกรอก</p>
+          <form id="applicationForm" novalidate>
+            <div class="fields">
+              <div class="field field-full">
+                <label for="position">ตำแหน่งที่สนใจ <span class="required">*</span></label>
+                <select id="position" name="position" required>
+                  <option value="">เลือกตำแหน่งงาน</option>
+                  <option>พนักงานประจำสาขา</option>
+                  <option>พนักงานครัว</option>
+                  <option>หัวหน้า / ผู้จัดการสาขา</option>
+                  <option>งานสำนักงานใหญ่</option>
+                  <option>อื่น ๆ</option>
+                </select>
+                <span class="error" data-error-for="position"></span>
+              </div>
+              <div class="field">
+                <label for="firstName">ชื่อ <span class="required">*</span></label>
+                <input id="firstName" name="firstName" autocomplete="given-name" required placeholder="ชื่อจริง">
+                <span class="error" data-error-for="firstName"></span>
+              </div>
+              <div class="field">
+                <label for="lastName">นามสกุล <span class="required">*</span></label>
+                <input id="lastName" name="lastName" autocomplete="family-name" required placeholder="นามสกุล">
+                <span class="error" data-error-for="lastName"></span>
+              </div>
+              <div class="field">
+                <label for="email">อีเมล <span class="required">*</span></label>
+                <input id="email" name="email" type="email" autocomplete="email" inputmode="email" required placeholder="name@example.com">
+                <span class="error" data-error-for="email"></span>
+              </div>
+              <div class="field">
+                <label for="phone">เบอร์ติดต่อ <span class="required">*</span></label>
+                <input id="phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required pattern="[0-9+() -]{9,20}" placeholder="08x-xxx-xxxx">
+                <span class="error" data-error-for="phone"></span>
+              </div>
+              <div class="field field-full">
+                <label for="address">ที่อยู่ปัจจุบัน <span class="required">*</span></label>
+                <textarea id="address" name="address" autocomplete="street-address" required placeholder="บ้านเลขที่ ถนน แขวง/ตำบล เขต/อำเภอ จังหวัด และรหัสไปรษณีย์"></textarea>
+                <span class="error" data-error-for="address"></span>
+              </div>
+              <div class="field field-full">
+                <label for="resume">เรซูเม่ <span class="required">*</span></label>
+                <input id="resume" name="resume" type="file" required accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+                <span class="hint">รองรับไฟล์ .pdf, .doc และ .docx ขนาดสูงสุด 4 MB</span>
+                <span class="error" data-error-for="resume"></span>
+              </div>
+              <div class="consent">
+                <input id="consent" name="consent" type="checkbox" required>
+                <label for="consent">ข้าพเจ้ารับทราบและยินยอมให้ บริษัท คุ้มสึ จำกัด เก็บรวบรวม ใช้ และประมวลผลข้อมูลส่วนบุคคลเพื่อวัตถุประสงค์ในการสรรหาและคัดเลือกพนักงานเท่านั้น <span class="required">*</span></label>
+                <span class="error" data-error-for="consent"></span>
+              </div>
+              <div class="actions">
+                <button class="submit" type="submit">เตรียมส่งใบสมัคร <span aria-hidden="true">→</span></button>
+                <span class="submit-note">ข้อมูลจะยังไม่ถูกส่งอัตโนมัติ ระบบจะเตรียมขั้นตอนส่งต่อให้ฝ่ายบุคคลทาง LINE</span>
+              </div>
+            </div>
+          </form>
+          <section class="result" id="result" tabindex="-1" aria-live="polite">
+            <h2>ข้อมูลพร้อมส่งแล้ว</h2>
+            <p>ระบบคัดลอกสรุปข้อมูลผู้สมัครให้แล้ว กรุณาเปิด LINE ฝ่ายบุคคล วางข้อความ และแนบไฟล์เรซูเม่เพื่อส่งใบสมัครให้สมบูรณ์</p>
+            <div class="result-actions">
+              <a class="result-link primary" href="https://line.me/R/ti/p/@kumtsuhr24" target="_blank" rel="noopener">เปิด LINE ฝ่ายบุคคล ↗</a>
+              <button class="result-link" id="copySummary" type="button">คัดลอกข้อมูลอีกครั้ง</button>
+              <a class="result-link" href="tel:0634419422">โทร 063-441-9422</a>
+            </div>
+          </section>
+          <p class="privacy">เพื่อความเป็นส่วนตัว แบบฟอร์มหน้านี้ไม่บันทึกข้อมูลหรือไฟล์ของคุณไว้บนเว็บไซต์</p>
+        </section>
+
+        <aside class="aside-card" aria-label="ข้อมูลการสมัครงาน">
+          <h2>ก่อนส่งใบสมัคร</h2>
+          <p>ตรวจสอบชื่อ เบอร์ติดต่อ และอีเมลให้ถูกต้อง พร้อมตั้งชื่อไฟล์เรซูเม่ให้ระบุตัวผู้สมัครได้ง่าย</p>
+          <p>หากยังไม่พบตำแหน่งที่ตรง สามารถเลือก “อื่น ๆ” เพื่อฝากประวัติไว้กับฝ่ายบุคคล</p>
+          <a class="aside-contact" href="https://line.me/R/ti/p/@kumtsuhr24" target="_blank" rel="noopener">LINE: @kumtsuhr24 <span>สอบถามฝ่ายทรัพยากรบุคคล</span></a>
+          <a class="aside-contact" href="tel:0946922559">094-692-2559 <span>โทรสอบถามเพิ่มเติม</span></a>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <section class="contact-footer" aria-labelledby="contactTitle">
+    <div class="wrap">
+      <div class="contact-footer-grid">
+        <section class="contact-footer-card contact-company" aria-label="ข้อมูลบริษัท">
+          <div class="contact-company-logo"><img src="https://kumtsu-group-profile.kumtsu-7034.chatgpt.site/assets/kumtsu.png" alt="โลโก้คุ้มสึ" width="64" height="64"></div>
+          <div><p>บริษัท คุ้มสึ จำกัด<br>(สำนักงานใหญ่)</p></div>
+        </section>
+        <section class="contact-footer-card" aria-label="ที่อยู่บริษัท">
+          <h2>ที่อยู่</h2>
+          <strong>19 พระรามเก้า 57/1</strong>
+          <p>(วิเศษสุข 2) แขวงพัฒนาการ<br>เขตสวนหลวง กรุงเทพฯ 10250</p>
+        </section>
+        <section class="contact-footer-card" aria-label="เวลาทำการ">
+          <h2>เวลาทำการ</h2>
+          <strong>วันจันทร์–ศุกร์</strong>
+          <p>09:00–18:00 น.</p>
+        </section>
+        <section class="contact-footer-card contact-channels" aria-labelledby="contactTitle">
+          <h2 id="contactTitle">ช่องทางการติดต่อ</h2>
+          <div class="contact-pills">
+            <a class="contact-pill contact-phone" href="tel:020558298"><span class="contact-label"><span class="contact-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.5 15.5 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1.1-.2a11 11 0 0 0 3.5.6c.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1a11 11 0 0 0 .6 3.5c.1.4 0 .8-.2 1.1l-2.3 2.2Z"/></svg></span><span class="contact-copy"><strong>โทร 02-055-8298</strong><small>โทร</small></span></span><span class="contact-arrow">↗</span></a>
+            <a class="contact-pill contact-line" href="https://lin.ee/XJMeWHK" target="_blank" rel="noopener"><span class="contact-label"><span class="contact-icon" aria-hidden="true"><img src="https://kumtsu-group-profile.kumtsu-7034.chatgpt.site/assets/contact-line.svg" alt=""></span><span class="contact-copy"><strong>LINE</strong><small>@kumtsu</small></span></span><span class="contact-arrow">↗</span></a>
+            <a class="contact-pill contact-facebook" href="https://www.facebook.com/kumtzzz" target="_blank" rel="noopener"><span class="contact-label"><span class="contact-icon" aria-hidden="true"><img src="https://kumtsu-group-profile.kumtsu-7034.chatgpt.site/assets/contact-facebook.svg" alt=""></span><span class="contact-copy"><strong>Facebook</strong><small>คุ้มสึ</small></span></span><span class="contact-arrow">↗</span></a>
+            <a class="contact-pill contact-instagram" href="https://www.instagram.com/kumtsu_th" target="_blank" rel="noopener"><span class="contact-label"><span class="contact-icon" aria-hidden="true"><img src="https://kumtsu-group-profile.kumtsu-7034.chatgpt.site/assets/contact-instagram.svg" alt=""></span><span class="contact-copy"><strong>Instagram</strong><small>@kumtsu_th</small></span></span><span class="contact-arrow">↗</span></a>
+            <a class="contact-pill contact-tiktok" href="https://www.tiktok.com/@kumtsuth" target="_blank" rel="noopener"><span class="contact-label"><span class="contact-icon" aria-hidden="true"><img src="https://kumtsu-group-profile.kumtsu-7034.chatgpt.site/assets/contact-tiktok.svg" alt=""></span><span class="contact-copy"><strong>TikTok</strong><small>@kumtsuth</small></span></span><span class="contact-arrow">↗</span></a>
+          </div>
+        </section>
+      </div>
+      <footer class="contact-bottom"><span>© <span id="year"></span> คุ้มสึ</span><a href="#pageTitle">กลับด้านบน ↑</a></footer>
+    </div>
+  </section>
+
+  <script>
+    const form = document.getElementById('applicationForm');
+    const result = document.getElementById('result');
+    const copyButton = document.getElementById('copySummary');
+    let applicationSummary = '';
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    function setError(field, message) {
+      const output = document.querySelector(`[data-error-for="${field.id}"]`);
+      if (output) output.textContent = message;
+      field.setAttribute('aria-invalid', message ? 'true' : 'false');
+    }
+
+    function validateField(field) {
+      let message = '';
+      if (field.type === 'file') {
+        const file = field.files[0];
+        if (!file) message = 'กรุณาแนบไฟล์เรซูเม่';
+        else {
+          const extension = file.name.split('.').pop().toLowerCase();
+          if (!['pdf', 'doc', 'docx'].includes(extension)) message = 'กรุณาเลือกไฟล์ .pdf, .doc หรือ .docx เท่านั้น';
+          else if (file.size > 4 * 1024 * 1024) message = 'ไฟล์มีขนาดเกิน 4 MB';
+        }
+      } else if (field.type === 'checkbox') {
+        if (!field.checked) message = 'กรุณารับทราบและยินยอมก่อนดำเนินการต่อ';
+      } else if (!field.value.trim()) {
+        message = 'กรุณากรอกข้อมูลในช่องนี้';
+      } else if (!field.checkValidity()) {
+        message = field.type === 'email' ? 'กรุณากรอกอีเมลให้ถูกต้อง' : 'กรุณาตรวจสอบข้อมูลอีกครั้ง';
+      }
+      setError(field, message);
+      return !message;
+    }
+
+    form.querySelectorAll('[required]').forEach(field => {
+      field.addEventListener(field.type === 'checkbox' || field.type === 'file' || field.tagName === 'SELECT' ? 'change' : 'blur', () => validateField(field));
+    });
+
+    async function copySummary() {
+      try {
+        await navigator.clipboard.writeText(applicationSummary);
+        copyButton.textContent = 'คัดลอกแล้ว ✓';
+      } catch (_) {
+        copyButton.textContent = 'เลือกข้อความและคัดลอกเอง';
+      }
+    }
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      const requiredFields = [...form.querySelectorAll('[required]')];
+      const valid = requiredFields.map(validateField).every(Boolean);
+      if (!valid) {
+        const firstInvalid = form.querySelector('[aria-invalid="true"]');
+        if (firstInvalid) firstInvalid.focus();
+        return;
+      }
+      const data = new FormData(form);
+      const file = document.getElementById('resume').files[0];
+      applicationSummary = [
+        'สมัครงาน บริษัท คุ้มสึ จำกัด',
+        `ตำแหน่ง: ${data.get('position')}`,
+        `ชื่อ-นามสกุล: ${data.get('firstName')} ${data.get('lastName')}`,
+        `อีเมล: ${data.get('email')}`,
+        `เบอร์ติดต่อ: ${data.get('phone')}`,
+        `ที่อยู่: ${data.get('address')}`,
+        `ไฟล์เรซูเม่: ${file.name}`
+      ].join('\n');
+      await copySummary();
+      result.classList.add('is-visible');
+      result.focus();
+    });
+
+    copyButton.addEventListener('click', copySummary);
+  </script>
+</body>
+</html>
