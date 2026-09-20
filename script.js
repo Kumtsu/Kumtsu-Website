@@ -119,7 +119,7 @@ const menuButton = document.getElementById('menuButton');
       dot.addEventListener('click', () => {
         showReview(index);
         startReviewSlider();
-      });
+      });contact: 'Contact Us' }contact: 'Contact Us', order: 'Order Now ↗' }contact: 'ติดต่อเรา' }contact: 'ติดต่อเรา', order: 'สั่งซื้อสินค้า ↗' }
       reviewPagination.appendChild(dot);
       return dot;
     });
