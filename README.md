@@ -38,6 +38,8 @@ Pages:
 - `/internal/reset-password.html` — securely sets a new password from the recovery link
 - `/internal/profile.html` — protected employee profile and private avatar upload
 
+Every internal HTML entry point declares `<base href="/internal/">`. This keeps CSS, JavaScript, images, navigation, and authentication redirects under the `/internal/` namespace even when visitors enter the route without a trailing slash.
+
 Configure these additional Vercel variables:
 
 ```text
