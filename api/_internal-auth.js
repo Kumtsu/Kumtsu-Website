@@ -66,7 +66,10 @@ async function serviceSupabase(path, options = {}) {
 
 async function adminUser(req) {
   const auth = await currentUser(req);
-  if (!auth || String(auth.user.email || '').toLowerCase() !== 'pachara.r@kumtsu.com') return null;
+  if (!auth) return null;
+  const { response, data } = await serviceSupabase(`/rest/v1/internal_profiles?user_id=eq.${encodeURIComponent(auth.user.id)}&select=email,status`);
+  const profile = response.ok ? data?.[0] : null;
+  if (!profile || profile.status !== 'active' || String(profile.email || '').trim().toLowerCase() !== 'pachara.r@kumtsu.com') return null;
   return auth;
 }
 
