@@ -7,8 +7,8 @@ const menuButton = document.getElementById('menuButton');
     const careerToggle = document.getElementById('careerToggle');
     const careerSubmenu = document.getElementById('careerSubmenu');
     const navTranslations = {
-      en: { about: 'About Us', story: 'Our Story', brands: 'Our Brands', franchise: 'Franchise', news: 'News & Events', contact: 'Contact Us', order: 'Order Now â' },
-      th: { about: 'à¹à¸à¸µà¹à¸¢à¸§à¸à¸±à¸à¹à¸£à¸²', story: 'à¸à¸¸à¸à¹à¸£à¸´à¹à¸¡à¸à¹à¸', brands: 'à¹à¸à¸£à¸à¸à¹à¹à¸à¹à¸à¸£à¸·à¸­', franchise: 'à¹à¸à¸£à¸à¹à¸à¸ªà¹', news: 'à¸à¹à¸²à¸§à¸ªà¸²à¸£ & à¸à¸´à¸à¸à¸£à¸£à¸¡', contact: 'à¸à¸´à¸à¸à¹à¸­à¹à¸£à¸²', order: 'à¸ªà¸±à¹à¸à¸à¸·à¹à¸­à¸ªà¸´à¸à¸à¹à¸² â' }
+      en: { about: 'About Us', story: 'Our Story', brands: 'Our Brands', franchise: 'Franchise', news: 'News & Events', contact: 'Contact Us', order: 'Order Now ↗' },
+      th: { about: 'เกี่ยวกับเรา', story: 'จุดเริ่มต้น', brands: 'แบรนด์ในเครือ', franchise: 'แฟรนไชส์', news: 'ข่าวสาร & กิจกรรม', contact: 'ติดต่อเรา', order: 'สั่งซื้อสินค้า ↗' }
     };
     let navLanguage = 'en';
 
@@ -22,8 +22,8 @@ const menuButton = document.getElementById('menuButton');
         button.classList.toggle('is-active', active);
         button.setAttribute('aria-pressed', String(active));
       });
-      mainNavHeader.setAttribute('aria-label', navLanguage === 'th' ? 'à¹à¸¡à¸à¸¹à¸«à¸¥à¸±à¸' : 'Main navigation');
-      menuButton.setAttribute('aria-label', navLanguage === 'th' ? 'à¹à¸à¸´à¸à¹à¸¡à¸à¸¹' : 'Open menu');
+      mainNavHeader.setAttribute('aria-label', navLanguage === 'th' ? 'เมนูหลัก' : 'Main navigation');
+      menuButton.setAttribute('aria-label', navLanguage === 'th' ? 'เปิดเมนู' : 'Open menu');
       try { localStorage.setItem('kumtsu-nav-language', navLanguage); } catch (_) {}
     }
 
@@ -35,7 +35,7 @@ const menuButton = document.getElementById('menuButton');
       morePanel.classList.toggle('is-open', open);
       morePanel.setAttribute('aria-hidden', String(!open));
       moreToggle.setAttribute('aria-expanded', String(open));
-      moreToggle.setAttribute('aria-label', open ? 'à¸à¸´à¸à¸«à¸±à¸§à¸à¹à¸­à¹à¸à¸´à¹à¸¡à¹à¸à¸´à¸¡' : 'à¹à¸à¸´à¸à¸«à¸±à¸§à¸à¹à¸­à¹à¸à¸´à¹à¸¡à¹à¸à¸´à¸¡');
+      moreToggle.setAttribute('aria-label', open ? 'ปิดหัวข้อเพิ่มเติม' : 'เปิดหัวข้อเพิ่มเติม');
       if (!open) setCareerSubmenu(false);
     }
     function setCareerSubmenu(open) {
@@ -57,7 +57,7 @@ const menuButton = document.getElementById('menuButton');
     menuButton.addEventListener('click', () => {
       const open = navLinks.classList.toggle('open');
       menuButton.setAttribute('aria-expanded', String(open));
-      menuButton.setAttribute('aria-label', navLanguage === 'th' ? (open ? 'à¸à¸´à¸à¹à¸¡à¸à¸¹' : 'à¹à¸à¸´à¸à¹à¸¡à¸à¸¹') : (open ? 'Close menu' : 'Open menu'));
+      menuButton.setAttribute('aria-label', navLanguage === 'th' ? (open ? 'ปิดเมนู' : 'เปิดเมนู') : (open ? 'Close menu' : 'Open menu'));
     });
     navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
       navLinks.classList.remove('open');
@@ -115,7 +115,7 @@ const menuButton = document.getElementById('menuButton');
       const dot = document.createElement('button');
       dot.type = 'button';
       dot.className = 'review-dot';
-      dot.setAttribute('aria-label', `à¸à¸¹à¸£à¸µà¸§à¸´à¸§à¸ à¸²à¸à¸à¸µà¹ ${index + 1}`);
+      dot.setAttribute('aria-label', `ดูรีวิวภาพที่ ${index + 1}`);
       dot.addEventListener('click', () => {
         showReview(index);
         startReviewSlider();
@@ -208,9 +208,9 @@ const menuButton = document.getElementById('menuButton');
       const number = item.querySelector('.branch-no').textContent.trim();
       const name = item.querySelector('span:last-child').textContent.trim();
       const coordinates = branchCoordinates[number];
-      const query = coordinates ? coordinates.join(',') : `à¸à¸¸à¹à¸¡à¸ªà¸¶ à¸ªà¸²à¸à¸² ${name} à¸à¸£à¸°à¹à¸à¸¨à¹à¸à¸¢`;
+      const query = coordinates ? coordinates.join(',') : `คุ้มสึ สาขา ${name} ประเทศไทย`;
       branchMap.src = `https://www.google.com/maps?q=${encodeURIComponent(query)}&z=16&output=embed`;
-      branchMap.title = `à¹à¸à¸à¸à¸µà¹à¸à¸¸à¹à¸¡à¸ªà¸¶ à¸ªà¸²à¸à¸²${name}`;
+      branchMap.title = `แผนที่คุ้มสึ สาขา${name}`;
       branchItems.forEach(branch => branch.classList.toggle('is-active', branch === item));
       item.setAttribute('aria-current', 'true');
       branchItems.filter(branch => branch !== item).forEach(branch => branch.removeAttribute('aria-current'));
@@ -222,7 +222,7 @@ const menuButton = document.getElementById('menuButton');
     branchItems.forEach(item => {
       item.tabIndex = 0;
       item.setAttribute('role', 'button');
-      item.setAttribute('aria-label', `à¹à¸ªà¸à¸à¸«à¸¡à¸¸à¸${item.querySelector('span:last-child').textContent.trim()}à¸à¸à¹à¸à¸à¸à¸µà¹`);
+      item.setAttribute('aria-label', `แสดงหมุด${item.querySelector('span:last-child').textContent.trim()}บนแผนที่`);
       item.addEventListener('click', () => focusBranch(item));
       item.addEventListener('keydown', event => {
         if (event.key === 'Enter' || event.key === ' ') {
@@ -234,7 +234,7 @@ const menuButton = document.getElementById('menuButton');
 
     mapReset.addEventListener('click', () => {
       branchMap.src = branchMap.dataset.allUrl;
-      branchMap.title = 'à¹à¸à¸à¸à¸µà¹à¸ªà¸²à¸à¸²à¸à¸¸à¹à¸¡à¸ªà¸¶à¸à¸±à¹à¸à¸«à¸¡à¸';
+      branchMap.title = 'แผนที่สาขาคุ้มสึทั้งหมด';
       branchItems.forEach(item => {
         item.classList.remove('is-active');
         item.removeAttribute('aria-current');
