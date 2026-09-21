@@ -3,7 +3,10 @@
     { "source": "/internal/login", "destination": "/internal/login.html" },
     { "source": "/internal/forgot-password", "destination": "/internal/forgot-password.html" },
     { "source": "/internal/reset-password", "destination": "/internal/reset-password.html" },
-    { "source": "/internal/profile", "destination": "/internal/profile.html" }
+    { "source": "/internal/profile", "destination": "/internal/profile.html" },
+    { "source": "/internal/dashboard", "destination": "/internal/dashboard.html" },
+    { "source": "/internal/admin", "destination": "/internal/admin/index.html" },
+    { "source": "/internal/admin/", "destination": "/internal/admin/index.html" }
   ],
   "headers": [
     {

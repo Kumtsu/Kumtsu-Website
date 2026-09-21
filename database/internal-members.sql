@@ -8,6 +8,7 @@ create table if not exists public.internal_profiles (
   email text not null unique check (lower(email) like '%@kumtsu.com'),
   internal_phone text check (internal_phone is null or char_length(internal_phone) <= 30),
   avatar_path text check (avatar_path is null or char_length(avatar_path) <= 500),
+  status text not null default 'active' check (status in ('pending','active','rejected')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

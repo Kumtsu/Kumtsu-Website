@@ -3,6 +3,10 @@ const resultBox = document.querySelector('#formResult');
 const submitButton = document.querySelector('#submitButton');
 const startedAt = document.querySelector('#startedAt');
 
+try {
+  if (JSON.parse(localStorage.getItem('kumtsu_internal_session') || 'null')?.access_token) location.replace('./dashboard.html');
+} catch (_) { /* show the access-request page */ }
+
 document.querySelector('#year').textContent = new Date().getFullYear();
 startedAt.value = Date.now().toString();
 

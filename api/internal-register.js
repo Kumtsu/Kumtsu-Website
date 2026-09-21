@@ -1,6 +1,7 @@
 const RATE_WINDOW_MS = 15 * 60 * 1000;
 const RATE_LIMIT = 5;
 const attempts = new Map();
+const { serviceSupabase } = require('./_internal-auth');
 
 function clean(value, maxLength) {
   return String(value || '').trim().replace(/\s+/g, ' ').slice(0, maxLength);
@@ -65,8 +66,8 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ message: 'กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน' });
   }
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return res.status(400).json({ message: 'รูปแบบอีเมลไม่ถูกต้อง' });
+  if (!/^[^\s@]+@kumtsu\.com$/i.test(email)) {
+    return res.status(400).json({ message: 'กรุณาใช้อีเมลองค์กร @kumtsu.com' });
   }
 
   if (startedAt && Date.now() - startedAt < 2500) {
@@ -82,8 +83,29 @@ module.exports = async function handler(req, res) {
     dateStyle: 'long', timeStyle: 'medium', timeZone: 'Asia/Bangkok',
   }).format(new Date());
   const safe = Object.fromEntries(Object.entries({ firstName, lastName, department, employeeId, email, phone, submittedAt }).map(([key, value]) => [key, escapeHtml(value)]));
-  const to = process.env.INTERNAL_EMAIL_TO || 'account.it@kumtsu.com';
+  const recipients = [...new Set([
+    'pachara.r@kumtsu.com',
+    'account.it@kumtsu.com',
+    ...(process.env.INTERNAL_EMAIL_TO || '').split(',').map((value) => value.trim()).filter(Boolean),
+  ])];
   const from = process.env.APPROVAL_EMAIL_FROM || 'Kumtsu Admin <account.it@kumtsu.com>';
+  const siteUrl = (process.env.PUBLIC_SITE_URL || 'https://www.kumtsu.com').replace(/\/$/, '');
+
+  const requestResult = await serviceSupabase('/rest/v1/internal_member_requests', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Prefer: 'return=representation' },
+    body: JSON.stringify({
+      first_name: firstName, last_name: lastName, department, employee_id: employeeId,
+      email, phone: phone || null, status: 'pending', notification_status: 'pending',
+    }),
+  });
+  if (!requestResult.response.ok) {
+    const duplicate = requestResult.response.status === 409 || String(requestResult.data?.code || '') === '23505';
+    return res.status(duplicate ? 409 : 502).json({
+      message: duplicate ? 'อีเมลหรือรหัสพนักงานนี้มีคำขออยู่ในระบบแล้ว' : 'ไม่สามารถบันทึกคำขอได้ กรุณาลองใหม่อีกครั้ง',
+    });
+  }
+  const requestId = requestResult.data[0].id;
 
   const emailResponse = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -94,7 +116,7 @@ module.exports = async function handler(req, res) {
     },
     body: JSON.stringify({
       from,
-      to: [to],
+      to: recipients,
       reply_to: email,
       subject: `คำขอเข้าใช้งานระบบภายใน — ${firstName} ${lastName} (${employeeId})`,
       html: `
@@ -111,6 +133,7 @@ module.exports = async function handler(req, res) {
                 <tr><td style="padding:10px;border-bottom:1px solid #e8ece8;color:#687068">เบอร์โทรศัพท์</td><td style="padding:10px;border-bottom:1px solid #e8ece8">${safe.phone || 'ไม่ได้ระบุ'}</td></tr>
                 <tr><td style="padding:10px;color:#687068">วันเวลาที่สมัคร</td><td style="padding:10px">${safe.submittedAt}</td></tr>
               </table>
+              <p style="margin:26px 0 0"><a href="${siteUrl}/internal/admin/" style="display:inline-block;background:#1ca650;color:#071109;padding:12px 20px;border-radius:999px;text-decoration:none;font-weight:700">เปิดหน้าตรวจสอบคำขอ</a></p>
             </div>
           </div>
         </div>`,
@@ -119,9 +142,16 @@ module.exports = async function handler(req, res) {
 
   const emailResult = await emailResponse.json().catch(() => ({}));
   if (!emailResponse.ok) {
+    await serviceSupabase(`/rest/v1/internal_member_requests?id=eq.${encodeURIComponent(requestId)}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ notification_status: 'failed' }),
+    });
     console.error('[internal-register] Resend error', { status: emailResponse.status, error: emailResult });
-    return res.status(502).json({ message: 'ไม่สามารถส่งอีเมลแจ้งฝ่าย IT ได้ กรุณาลองใหม่อีกครั้ง' });
+    return res.status(202).json({ message: 'บันทึกคำขอแล้ว แต่การแจ้งอีเมลขัดข้อง ฝ่าย IT สามารถตรวจสอบคำขอในระบบหลังบ้านได้' });
   }
+
+  await serviceSupabase(`/rest/v1/internal_member_requests?id=eq.${encodeURIComponent(requestId)}`, {
+    method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ notification_status: 'sent' }),
+  });
 
   console.log('[internal-register] request sent', { employeeId, emailId: emailResult.id });
   return res.status(200).json({ message: 'ส่งคำขอเรียบร้อยแล้ว ฝ่าย IT จะตรวจสอบและติดต่อกลับทางอีเมล' });

@@ -7,6 +7,13 @@ function env() {
   return { url: url.replace(/\/$/, ''), key };
 }
 
+function serviceEnv() {
+  const { url } = env();
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceKey) throw new Error('SUPABASE_SERVICE_ROLE_KEY is not configured');
+  return { url, serviceKey };
+}
+
 function send(res, status, body) {
   res.statusCode = status;
   Object.entries(JSON_HEADERS).forEach(([key, value]) => res.setHeader(key, value));
@@ -47,4 +54,23 @@ async function currentUser(req) {
   return response.ok ? { token, user: data } : null;
 }
 
-module.exports = { bearer, currentUser, env, readJson, send, supabase };
+async function serviceSupabase(path, options = {}) {
+  const { url, serviceKey } = serviceEnv();
+  const headers = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, ...options.headers };
+  const response = await fetch(`${url}${path}`, { ...options, headers });
+  const text = await response.text();
+  let data = {};
+  try { data = text ? JSON.parse(text) : {}; } catch (_) { data = { message: text }; }
+  return { response, data };
+}
+
+async function adminUser(req) {
+  const auth = await currentUser(req);
+  if (!auth) return null;
+  const { response, data } = await serviceSupabase(`/rest/v1/internal_profiles?user_id=eq.${encodeURIComponent(auth.user.id)}&select=email,status`);
+  const profile = response.ok ? data?.[0] : null;
+  if (!profile || profile.status !== 'active' || String(profile.email || '').trim().toLowerCase() !== 'pachara.r@kumtsu.com') return null;
+  return auth;
+}
+
+module.exports = { adminUser, bearer, currentUser, env, readJson, send, serviceEnv, serviceSupabase, supabase };

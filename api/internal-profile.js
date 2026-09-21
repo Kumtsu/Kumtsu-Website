@@ -1,6 +1,6 @@
 const { currentUser, readJson, send, supabase } = require('./_internal-auth');
 
-const fields = 'user_id,employee_id,first_name,last_name,department,email,internal_phone,avatar_path,updated_at';
+const fields = 'user_id,employee_id,first_name,last_name,department,email,internal_phone,avatar_path,status,updated_at';
 
 module.exports = async function handler(req, res) {
   if (!['GET', 'PATCH'].includes(req.method)) return send(res, 405, { message: 'Method not allowed' });
@@ -11,8 +11,11 @@ module.exports = async function handler(req, res) {
     if (req.method === 'GET') {
       const { response, data } = await supabase(path, { headers: { Authorization: `Bearer ${auth.token}`, Accept: 'application/json' } });
       if (!response.ok || !data[0]) return send(res, 404, { message: 'ไม่พบโปรไฟล์พนักงาน กรุณาติดต่อฝ่าย IT' });
+      if (data[0].status !== 'active') return send(res, 403, { message: 'บัญชีนี้ยังไม่ได้รับอนุมัติให้ใช้งาน' });
       return send(res, 200, { user: auth.user, profile: data[0] });
     }
+    const current = await supabase(path, { headers: { Authorization: `Bearer ${auth.token}`, Accept: 'application/json' } });
+    if (!current.response.ok || current.data?.[0]?.status !== 'active') return send(res, 403, { message: 'บัญชีนี้ยังไม่ได้รับอนุมัติให้ใช้งาน' });
     const body = await readJson(req);
     const update = {
       first_name: String(body.firstName || '').trim().slice(0, 80),
