@@ -1,0 +1,3 @@
+import { api } from './auth.js';
+const form = document.querySelector('#forgotForm'); const result = document.querySelector('#result');
+form.addEventListener('submit', async (event) => { event.preventDefault(); const button = form.querySelector('button'); button.disabled = true; button.textContent = 'กำลังส่ง…'; const payload = Object.fromEntries(new FormData(form)); const { response, data } = await api('/api/internal-forgot-password', { method: 'POST', body: JSON.stringify(payload) }); result.hidden = false; result.className = `form-result is-${response.ok ? 'success' : 'error'}`; result.textContent = data.message || 'ไม่สามารถดำเนินการได้'; button.disabled = false; button.textContent = 'ส่งลิงก์รีเซ็ต →'; });

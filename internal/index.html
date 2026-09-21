@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#121212">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="แบบฟอร์มขอเข้าใช้งานระบบภายในสำหรับพนักงานคุ้มสึ">
+  <title>ขอเข้าใช้งานระบบภายใน | Kumtsu</title>
+  <base href="/internal/">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="internal-header">
+    <a class="internal-brand" href="/" aria-label="กลับหน้าหลักคุ้มสึ">
+      <img src="https://kumtsu-group-profile.kumtsu-7034.chatgpt.site/assets/kumtsu.png" alt="โลโก้คุ้มสึ" width="50" height="50">
+      <span>คุ้มสึ<small>KUMTSU INTERNAL</small></span>
+    </a>
+    <nav class="internal-actions" aria-label="เมนูระบบภายใน">
+      <a class="login-link" href="./login.html">เข้าสู่ระบบ</a>
+      <a class="back-link" href="/">กลับหน้าหลัก <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="pageTitle">
+      <p class="eyebrow">INTERNAL ACCESS</p>
+      <h1 id="pageTitle">ขอเข้าใช้งาน<br><span>ระบบภายในองค์กร</span></h1>
+      <p class="intro-copy">สำหรับพนักงานบริษัท คุ้มสึ จำกัด กรุณากรอกข้อมูลให้ครบถ้วน ฝ่าย IT จะตรวจสอบและติดต่อกลับทางอีเมลที่ระบุ</p>
+      <div class="security-note">
+        <strong>พื้นที่สำหรับบุคลากรภายใน</strong>
+        <span>การส่งคำขอไม่ได้หมายถึงการอนุมัติสิทธิ์เข้าใช้งานโดยอัตโนมัติ</span>
+      </div>
+    </section>
+
+    <section class="form-card" aria-labelledby="formTitle">
+      <div class="form-heading">
+        <div>
+          <p class="form-kicker">EMPLOYEE VERIFICATION</p>
+          <h2 id="formTitle">ข้อมูลผู้ขอใช้งาน</h2>
+        </div>
+        <span class="required-note"><i aria-hidden="true"></i> จำเป็นต้องกรอก</span>
+      </div>
+
+      <form id="internalRegistrationForm" novalidate>
+        <input type="hidden" id="startedAt" name="startedAt">
+        <div class="honeypot" aria-hidden="true">
+          <label for="website">เว็บไซต์</label>
+          <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+
+        <div class="field-grid two-columns">
+          <label class="field">
+            <span>ชื่อ <b>*</b></span>
+            <input name="firstName" type="text" autocomplete="given-name" maxlength="80" required placeholder="ชื่อจริง">
+          </label>
+          <label class="field">
+            <span>นามสกุล <b>*</b></span>
+            <input name="lastName" type="text" autocomplete="family-name" maxlength="80" required placeholder="นามสกุล">
+          </label>
+        </div>
+
+        <div class="field-grid two-columns">
+          <label class="field">
+            <span>แผนก <b>*</b></span>
+            <input name="department" type="text" autocomplete="organization-title" maxlength="100" required placeholder="เช่น Operations, Marketing">
+          </label>
+          <label class="field">
+            <span>รหัสพนักงาน <b>*</b></span>
+            <input name="employeeId" type="text" inputmode="text" autocomplete="off" maxlength="30" required placeholder="รหัสพนักงาน">
+          </label>
+        </div>
+
+        <label class="field">
+          <span>อีเมลบริษัท <b>*</b></span>
+          <input name="email" type="email" autocomplete="email" maxlength="160" required placeholder="name@kumtsu.com">
+          <small>ระบบจะแจ้งผลการตรวจสอบกลับทางอีเมลนี้</small>
+        </label>
+
+        <label class="field">
+          <span>เบอร์โทรศัพท์</span>
+          <input name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="0XX-XXX-XXXX">
+        </label>
+
+        <label class="consent">
+          <input name="consent" type="checkbox" required>
+          <span>ข้าพเจ้ายืนยันว่าข้อมูลข้างต้นถูกต้อง และยินยอมให้บริษัทใช้ข้อมูลนี้เพื่อตรวจสอบสิทธิ์การเข้าใช้งานระบบภายใน <b>*</b></span>
+        </label>
+
+        <div id="formResult" class="form-result" role="status" aria-live="polite" hidden></div>
+
+        <div class="form-actions">
+          <p>ข้อมูลจะถูกส่งให้ฝ่าย IT ที่ <strong>account.it@kumtsu.com</strong></p>
+          <button id="submitButton" type="submit">ส่งคำขอเข้าใช้งาน <span aria-hidden="true">→</span></button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <span>© <span id="year"></span> บริษัท คุ้มสึ จำกัด</span>
+    <span>Internal Access Request</span>
+  </footer>
+  <script src="./app.js" defer></script>
+</body>
+</html>
