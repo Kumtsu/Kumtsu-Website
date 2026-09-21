@@ -6,14 +6,14 @@
   if (grid) {
     grid.innerHTML = news.map((item) => `
       <article class="news-card">
-        <a class="news-card-image" href="news-detail.html?id=${encodeURIComponent(item.id)}" aria-label="à¸­à¹à¸²à¸à¸à¹à¸²à¸§ ${item.title}">
+        <a class="news-card-image" href="news-detail.html?id=${encodeURIComponent(item.id)}" aria-label="อ่านข่าว ${item.title}">
           <img src="${item.image}" alt="" loading="lazy">
         </a>
         <div class="news-card-body">
           <div class="news-meta"><span>${item.category}</span><time>${item.date}</time></div>
           <h2><a href="news-detail.html?id=${encodeURIComponent(item.id)}">${item.title}</a></h2>
           <p>${item.excerpt}</p>
-          <a class="news-read-more" href="news-detail.html?id=${encodeURIComponent(item.id)}">à¸­à¹à¸²à¸à¹à¸à¸´à¹à¸¡à¹à¸à¸´à¸¡ <span aria-hidden="true">â</span></a>
+          <a class="news-read-more" href="news-detail.html?id=${encodeURIComponent(item.id)}">อ่านเพิ่มเติม <span aria-hidden="true">→</span></a>
         </div>
       </article>`).join('');
   }
@@ -29,7 +29,7 @@
       <p class="news-detail-lead">${item.excerpt}</p>
       <figure class="news-detail-cover"><img src="${item.image}" alt="${item.title}"></figure>
       <div class="news-detail-copy">${item.body.map((paragraph) => `<p>${paragraph}</p>`).join('')}</div>
-      <a class="news-back" href="news.html">â à¸¢à¹à¸­à¸à¸à¸¥à¸±à¸à¹à¸à¸«à¸à¹à¸²à¸à¹à¸²à¸§à¸ªà¸²à¸£</a>`;
+      <a class="news-back" href="news.html">← ย้อนกลับไปหน้าข่าวสาร</a>`;
   }
 
   const year = document.getElementById('newsYear');
