@@ -1,0 +1,19 @@
+{
+  "rewrites": [
+    { "source": "/internal/login", "destination": "/internal/login.html" },
+    { "source": "/internal/forgot-password", "destination": "/internal/forgot-password.html" },
+    { "source": "/internal/reset-password", "destination": "/internal/reset-password.html" },
+    { "source": "/internal/profile", "destination": "/internal/profile.html" }
+  ],
+  "headers": [
+    {
+      "source": "/internal/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Cache-Control", "value": "no-store" }
+      ]
+    }
+  ]
+}

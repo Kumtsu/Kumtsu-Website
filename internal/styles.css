@@ -21,7 +21,7 @@ body {
   line-height: 1.65;
 }
 a { color: inherit; text-decoration: none; }
-button, input { font: inherit; }
+button, input, select { font: inherit; }
 .internal-header {
   min-height: 82px;
   display: flex;
@@ -37,6 +37,9 @@ button, input { font: inherit; }
 .internal-brand small { display: block; margin-top: -3px; color: var(--muted); font-size: .62rem; letter-spacing: .19em; }
 .back-link { padding: 9px 15px; border: 1px solid #454945; border-radius: 999px; color: #e9ece9; font-size: .86rem; font-weight: 800; }
 .back-link:hover, .back-link:focus-visible { border-color: var(--green); color: var(--green-bright); outline: none; }
+.internal-actions { display: flex; align-items: center; gap: 10px; }
+.login-link { padding: 10px 18px; border-radius: 999px; background: var(--green); color: #061008; font-size: .86rem; font-weight: 900; }
+.login-link:hover, .login-link:focus-visible { background: var(--green-bright); outline: none; }
 main { width: min(calc(100% - 48px), var(--max)); margin: 0 auto; padding: clamp(58px, 8vw, 108px) 0 80px; display: grid; grid-template-columns: .82fr 1.18fr; gap: clamp(40px, 7vw, 90px); align-items: start; }
 .intro { position: sticky; top: 40px; }
 .eyebrow, .form-kicker { margin: 0 0 13px; color: var(--green-bright); font-size: .76rem; font-weight: 900; letter-spacing: .18em; }
@@ -58,15 +61,15 @@ h1 span { color: var(--green-bright); }
 .field { display: grid; gap: 8px; margin-bottom: 19px; }
 .field > span { color: #e9ebe9; font-size: .88rem; font-weight: 800; }
 .field b, .consent b { color: var(--green-bright); }
-.field input {
+.field input, .field select {
   width: 100%; min-height: 52px; padding: 0 15px;
   border: 1px solid #474b47; border-radius: 9px;
   background: #151715; color: #fff; outline: none;
   transition: border-color .2s, box-shadow .2s, background .2s;
 }
 .field input::placeholder { color: #717671; }
-.field input:hover { border-color: #626762; }
-.field input:focus { border-color: var(--green); background: #121512; box-shadow: 0 0 0 3px rgba(28,166,80,.16); }
+.field input:hover, .field select:hover { border-color: #626762; }
+.field input:focus, .field select:focus { border-color: var(--green); background: #121512; box-shadow: 0 0 0 3px rgba(28,166,80,.16); }
 .field input:user-invalid { border-color: var(--danger); }
 .field small { color: var(--muted); font-size: .76rem; }
 .consent { display: grid; grid-template-columns: 22px 1fr; gap: 11px; align-items: start; margin: 4px 0 25px; padding: 16px; border: 1px solid var(--line); border-radius: 10px; color: #c8cbc8; font-size: .82rem; }
@@ -85,6 +88,29 @@ h1 span { color: var(--green-bright); }
 .form-result.is-success { border-color: rgba(57,198,108,.55); background: rgba(28,166,80,.12); color: #88e5aa; }
 .form-result.is-error { border-color: rgba(255,109,109,.5); background: rgba(255,109,109,.08); color: #ff9b9b; }
 .honeypot { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.auth-shell { min-height: calc(100vh - 83px); display: grid; place-items: center; padding: 48px 24px; }
+.auth-card { width: min(100%, 520px); padding: clamp(28px, 5vw, 48px); border: 1px solid var(--line); border-radius: 18px; background: var(--card); box-shadow: 0 28px 75px rgba(0,0,0,.32); }
+.auth-card h1 { font-size: clamp(2rem, 5vw, 3.25rem); }
+.auth-card .intro-copy { margin: 15px 0 28px; font-size: .95rem; }
+.auth-card .form-actions { margin-top: 8px; }
+.auth-card .form-actions button { width: 100%; }
+.auth-card .form-actions + .text-link, .text-link { display: inline-block; margin-top: 18px; color: var(--green-bright); font-size: .86rem; font-weight: 800; }
+.auth-card .form-result { margin-top: 18px; margin-bottom: 0; }
+.profile-main { display: block; padding-top: 48px; }
+.profile-top { display: flex; justify-content: space-between; gap: 24px; align-items: end; margin-bottom: 28px; }
+.profile-top h1 { font-size: clamp(2.2rem, 6vw, 4.8rem); }
+.profile-card { display: grid; grid-template-columns: 230px 1fr; gap: clamp(28px, 5vw, 60px); }
+.avatar-panel { text-align: center; }
+.avatar-preview { width: 180px; height: 180px; display: block; margin: 0 auto 17px; border: 1px solid #4a504a; border-radius: 50%; object-fit: cover; background: #101210; }
+.avatar-input { position: absolute; opacity: 0; pointer-events: none; }
+.avatar-button { display: inline-flex; min-height: 42px; padding: 0 16px; align-items: center; justify-content: center; border: 1px solid #505650; border-radius: 999px; cursor: pointer; font-size: .82rem; font-weight: 800; }
+.avatar-help { margin: 10px 0 0; color: var(--muted); font-size: .72rem; }
+.readonly { opacity: .7; }
+.logout-button { padding: 9px 15px; border: 1px solid #654040; border-radius: 999px; background: transparent; color: #ffaaaa; cursor: pointer; font-weight: 800; }
+.user-chip { color: var(--muted); font-size: .82rem; }
+.user-chip strong { display: block; color: #fff; }
+.toast { position: fixed; z-index: 20; right: 22px; bottom: 22px; max-width: min(390px, calc(100vw - 44px)); padding: 14px 18px; border: 1px solid rgba(57,198,108,.5); border-radius: 10px; background: #18331f; color: #b8f2cb; box-shadow: 0 18px 50px rgba(0,0,0,.35); font-weight: 800; }
+.toast.is-error { border-color: rgba(255,109,109,.5); background: #3a2020; color: #ffc0c0; }
 footer { width: min(calc(100% - 48px), var(--max)); margin: 0 auto; padding: 22px 0 34px; display: flex; justify-content: space-between; gap: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: .77rem; }
 @media (max-width: 900px) {
   main { grid-template-columns: 1fr; }
@@ -96,10 +122,14 @@ footer { width: min(calc(100% - 48px), var(--max)); margin: 0 auto; padding: 22p
   .internal-brand img { width: 44px; height: 44px; }
   .internal-brand { font-size: 1rem; }
   .back-link { padding: 8px 11px; font-size: .75rem; }
+  .login-link { padding: 8px 12px; font-size: .75rem; }
+  .internal-actions { gap: 6px; }
   main { width: min(calc(100% - 30px), var(--max)); padding-top: 42px; }
   .two-columns { grid-template-columns: 1fr; gap: 0; }
   .form-card { border-radius: 13px; }
   .form-heading, .form-actions, footer { align-items: flex-start; flex-direction: column; }
   .form-actions button { width: 100%; }
   footer { width: min(calc(100% - 30px), var(--max)); }
+  .profile-card { grid-template-columns: 1fr; }
+  .profile-top { align-items: flex-start; flex-direction: column; }
 }
