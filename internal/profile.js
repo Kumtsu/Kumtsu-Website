@@ -27,6 +27,7 @@ async function load() {
   const { response, data } = await api('/api/internal-profile');
   if (!response.ok) throw new Error(data.message || 'โหลดโปรไฟล์ไม่สำเร็จ');
   profile = data.profile;
+  if (String(data.user.email || '').toLowerCase() === 'pachara.r@kumtsu.com') document.querySelector('#adminLink').hidden = false;
   form.elements.firstName.value = profile.first_name || '';
   form.elements.lastName.value = profile.last_name || '';
   form.elements.employeeId.value = profile.employee_id || '';
