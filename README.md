@@ -40,7 +40,7 @@ Pages:
 - `/internal/profile.html` — protected employee profile and private avatar upload
 - `/internal/admin/` — protected member-management dashboard (restricted to `pachara.r@kumtsu.com`)
 
-Successful login opens `/internal/dashboard.html`. The page verifies the current Active profile through `/api/internal-profile` before rendering the employee identity, exposes only approved external systems in new tabs, and marks unfinished systems as disabled. Public registration/login pages and the protected workspace display the internal-data security warning.
+Successful login opens `/internal/dashboard.html`. Its system-link data is not embedded in public HTML: `/api/internal-dashboard` returns it only after verifying the Supabase token and an Active profile. Approved external systems open in new tabs and unfinished systems remain disabled. Public registration/login pages and the protected workspace display the internal-data security warning.
 
 Every internal HTML entry point declares `<base href="/internal/">`. This keeps CSS, JavaScript, images, navigation, and authentication redirects under the `/internal/` namespace even when visitors enter the route without a trailing slash.
 

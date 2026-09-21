@@ -178,6 +178,7 @@ a.system-card:hover, a.system-card:focus-visible { border-color: var(--green); b
 .system-badge { display: inline-flex; padding: 5px 10px; border-radius: 999px; background: rgba(255,184,77,.1); color: #ffc46b; font-size: .67rem; font-weight: 900; }
 .system-badge.is-live { background: rgba(57,198,108,.13); color: #79df9f; }
 .system-card.is-disabled { opacity: .6; cursor: not-allowed; }
+.loading-card { grid-template-columns: 1fr; }
 .security-warning { display: flex; gap: 16px; align-items: flex-start; margin-top: 30px; padding: 20px 22px; border: 1px solid rgba(255,128,73,.55); border-radius: 13px; background: rgba(150,55,27,.14); color: #ffd3bf; }
 .warning-icon { display: grid; flex: 0 0 34px; width: 34px; height: 34px; place-items: center; border-radius: 50%; background: #d95d32; color: #fff; font-size: 1.1rem; font-weight: 900; }
 .security-warning strong { display: block; color: #ffe6db; }
