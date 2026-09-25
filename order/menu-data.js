@@ -563,8 +563,7 @@ window.KUMTSU_CATALOG = {
       "id": "anthony",
       "name": "ไก่ทอดแอนโทนี่",
       "short": "แอนโทนี่",
-      "logo": null,
-      "monogram": "A",
+      "logo": "assets/brand-anthony.jpg",
       "accent": "#ef5a2c",
       "categories": [
         {
@@ -799,8 +798,7 @@ window.KUMTSU_CATALOG = {
       "id": "mee-pung",
       "name": "หมีปุ้ง หมูปิ้งโบราณ",
       "short": "หมีปุ้ง",
-      "logo": null,
-      "monogram": "หมี",
+      "logo": "assets/brand-mee-pung.jpg",
       "accent": "#c37a35",
       "categories": [
         {
@@ -1099,8 +1097,7 @@ window.KUMTSU_CATALOG = {
       "id": "zoyy-noodle",
       "name": "โซ้ย นู้ดเดิ้ล",
       "short": "โซ้ย",
-      "logo": null,
-      "monogram": "Z",
+      "logo": "assets/brand-zoyy.jpg",
       "accent": "#e44037",
       "categories": [
         {
@@ -1395,8 +1392,7 @@ window.KUMTSU_CATALOG = {
       "id": "southern",
       "name": "ข่า ตะไคร้ ใบมะกรูด",
       "short": "อาหารใต้",
-      "logo": null,
-      "monogram": "ใต้",
+      "logo": "assets/brand-southern.jpg",
       "accent": "#1f8b60",
       "categories": [
         {
