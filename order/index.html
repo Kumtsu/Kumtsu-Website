@@ -150,6 +150,7 @@
         <label>เบอร์โทรศัพท์<input id="customerPhone" type="tel" inputmode="tel" placeholder="08x-xxx-xxxx" required></label>
         <label id="addressField">ที่อยู่จัดส่ง<textarea id="customerAddress" rows="2" placeholder="บ้านเลขที่ ถนน เขต/อำเภอ"></textarea></label>
         <label>หมายเหตุ (ถ้ามี)<textarea id="orderNote" rows="2" placeholder="เช่น ไม่ใส่ต้นหอม"></textarea></label>
+        <p class="checkout-message" id="checkoutMessage" role="alert" hidden></p>
       </section>
     </div>
     <div class="cart-footer" id="cartFooter" hidden>
@@ -164,11 +165,10 @@
     <span class="success-icon">✓</span>
     <p class="section-kicker">ส่งออเดอร์แล้ว</p>
     <h2 id="successTitle">ขอบคุณที่สั่งคุ้มสึ</h2>
-    <p>คัดลอกรายการแล้วส่งให้ร้านทาง LINE เพื่อยืนยันออเดอร์</p>
+    <p>ร้านได้รับออเดอร์แล้ว กรุณารอการยืนยันจากทางร้าน</p>
     <strong id="orderNumber">KM0000</strong>
     <div class="success-actions">
       <button id="copyOrderButton" type="button">คัดลอกรายการ</button>
-      <a id="lineOrderButton" href="https://lin.ee/XJMeWHK" target="_blank" rel="noopener">ส่งออเดอร์ทาง LINE</a>
     </div>
     <button class="back-menu" id="doneButton" type="button">กลับไปดูเมนู</button>
   </dialog>

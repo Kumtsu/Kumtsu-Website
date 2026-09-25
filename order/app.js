@@ -493,13 +493,23 @@ function renderCart(){
 function add(key){state.cart[key]=(state.cart[key]||0)+1;renderCart();const btn=document.querySelector(`[data-add="${key}"]`);if(btn){btn.textContent="✓ เพิ่มแล้ว";btn.classList.add("added");setTimeout(()=>{btn.textContent="+ เพิ่ม";btn.classList.remove("added")},650)}}
 function openCart(){drawer.classList.add("open");drawer.setAttribute("aria-hidden","false");overlay.hidden=false;document.body.style.overflow="hidden";setTimeout(()=>$("#closeCart").focus(),50)}
 function closeCart(){drawer.classList.remove("open");drawer.setAttribute("aria-hidden","true");overlay.hidden=true;document.body.style.overflow=""}
-function validateAndOrder(){
+let orderSubmitting=false;
+async function validateAndOrder(){
   const fields=[$("#customerName"),$("#customerPhone")];if(state.method==="delivery")fields.push($("#customerAddress"));
   let valid=true;fields.forEach(f=>{const ok=f.value.trim().length>0;f.classList.toggle("invalid",!ok);if(!ok)valid=false});
   if(!valid){fields.find(f=>f.classList.contains("invalid"))?.focus();return}
-  const orderNo=`KM${Math.floor(1000+Math.random()*9000)}`,items=cartItems(),total=items.reduce((s,x)=>s+x.item.price*x.qty,0);
-  state.lastOrderText=[`ออเดอร์ ${orderNo}`,`แบรนด์: ${activeBrand().name}`,`ชื่อ: ${$("#customerName").value.trim()}`,`โทร: ${$("#customerPhone").value.trim()}`,state.method==="delivery"?`จัดส่ง: ${$("#customerAddress").value.trim()}`:"รับอาหารที่ร้าน",...items.map(x=>`- ${x.item.name} x${x.qty} = ${money(x.item.price*x.qty)}`),`รวมค่าอาหาร ${money(total)}`,$("#orderNote").value.trim()?`หมายเหตุ: ${$("#orderNote").value.trim()}`:""].filter(Boolean).join("\n");
-  $("#orderNumber").textContent=orderNo;closeCart();$("#successDialog").showModal();state.cart={};state.checkout=false;renderCart();
+  if(orderSubmitting)return;
+  const items=cartItems(),total=items.reduce((s,x)=>s+x.item.price*x.qty,0),button=$("#checkoutButton"),message=$("#checkoutMessage");
+  orderSubmitting=true;button.disabled=true;button.textContent="กำลังส่งออเดอร์…";message.hidden=true;
+  try{
+    const response=await fetch("/api/orders",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({brandId:activeBrand().id,items:items.map(x=>({id:x.item.id,quantity:x.qty})),fulfilmentMethod:state.method,customerName:$("#customerName").value.trim(),customerPhone:$("#customerPhone").value.trim(),customerAddress:$("#customerAddress").value.trim(),customerNote:$("#orderNote").value.trim()})});
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(result.message||"ส่งออเดอร์ไม่สำเร็จ กรุณาลองใหม่");
+    const orderNo=result.orderNumber;
+    state.lastOrderText=[`ออเดอร์ ${orderNo}`,`แบรนด์: ${activeBrand().name}`,`ชื่อ: ${$("#customerName").value.trim()}`,`โทร: ${$("#customerPhone").value.trim()}`,state.method==="delivery"?`จัดส่ง: ${$("#customerAddress").value.trim()}`:"รับอาหารที่ร้าน",...items.map(x=>`- ${x.item.name} x${x.qty} = ${money(x.item.price*x.qty)}`),`รวมค่าอาหาร ${money(total)}`,$("#orderNote").value.trim()?`หมายเหตุ: ${$("#orderNote").value.trim()}`:""].filter(Boolean).join("\n");
+    $("#orderNumber").textContent=orderNo;closeCart();$("#successDialog").showModal();state.cart={};state.checkout=false;renderCart();
+  }catch(error){message.textContent=error.message||"ส่งออเดอร์ไม่สำเร็จ กรุณาลองใหม่";message.hidden=false}
+  finally{orderSubmitting=false;button.disabled=false;if(state.checkout)button.textContent="ยืนยันคำสั่งซื้อ"}
 }
 tabs.addEventListener("click",e=>{const b=e.target.closest("[data-category]");if(!b)return;state.category=b.dataset.category;renderTabs();renderMenu()});
 brandTabs.addEventListener("click",e=>{

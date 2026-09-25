@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0b0f0c"><meta name="robots" content="noindex,nofollow">
+  <title>หลังบ้านออเดอร์ | Kumtsu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Kanit:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css"><script src="admin.js" defer></script>
+</head>
+<body><main>
+  <section class="login-view" id="loginView"><form class="login-card" id="loginForm">
+    <img src="../assets/kumtsu-logo.jpg" alt="โลโก้คุ้มสึ"><p class="kicker">KUMTSU ORDER</p><h1>เข้าสู่ระบบหลังบ้าน</h1><p>สำหรับผู้ดูแลออเดอร์ที่ได้รับสิทธิ์เท่านั้น</p>
+    <label>อีเมลบริษัท<input id="email" type="email" autocomplete="username" placeholder="name@kumtsu.com" required></label><label>รหัสผ่าน<input id="password" type="password" autocomplete="current-password" required></label>
+    <p class="form-message" id="loginMessage" role="alert"></p><button type="submit">เข้าสู่ระบบ</button><a href="../">← กลับหน้าสั่งอาหาร</a>
+  </form></section>
+  <section class="dashboard" id="dashboard" hidden>
+    <header><div class="identity"><img src="../assets/kumtsu-logo.jpg" alt=""><div><p>KUMTSU ORDER</p><h1>ออเดอร์ทั้งหมด</h1></div></div><div class="header-actions"><span id="viewer"></span><button id="soundButton" type="button">🔔 เสียงแจ้งเตือน</button><button id="logoutButton" type="button">ออกจากระบบ</button></div></header>
+    <div class="toolbar"><label class="search"><span>ค้นหา</span><input id="searchInput" type="search" placeholder="รหัสออเดอร์ ชื่อ หรือเบอร์โทร"></label><label><span>สถานะ</span><select id="statusFilter"><option value="all">ทั้งหมด</option><option value="new">ออเดอร์ใหม่</option><option value="confirmed">ยืนยันแล้ว</option><option value="preparing">กำลังทำ</option><option value="ready">พร้อมส่ง</option><option value="completed">เสร็จสิ้น</option><option value="cancelled">ยกเลิก</option></select></label><button id="refreshButton" type="button">↻ อัปเดต</button></div>
+    <div class="stats" id="stats"></div><p class="system-message" id="systemMessage" role="status"></p><div class="orders" id="orders"></div>
+  </section>
+</main></body></html>

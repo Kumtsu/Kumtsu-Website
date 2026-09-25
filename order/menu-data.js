@@ -1,4 +1,4 @@
-window.KUMTSU_CATALOG = {
+const KUMTSU_CATALOG = {
   "brands": [
     {
       "id": "kumtsu",
@@ -1994,3 +1994,6 @@ window.KUMTSU_CATALOG = {
     }
   ]
 };
+
+if (typeof window !== "undefined") window.KUMTSU_CATALOG = KUMTSU_CATALOG;
+if (typeof module !== "undefined") module.exports = KUMTSU_CATALOG;
