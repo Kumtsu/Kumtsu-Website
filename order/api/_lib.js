@@ -1,5 +1,9 @@
 const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8' };
-const ADMIN_EMAILS = new Set(['pachara.r@kumtsu.com', 'sudarat@kumtsu.com']);
+const ADMIN_EMAILS = new Set([
+  'pachara.r@kumtsu.com',
+  'sudarat@kumtsu.com',
+  'krissana.s@kumtsu.com',
+]);
 
 function env() {
   const url = process.env.SUPABASE_URL;
