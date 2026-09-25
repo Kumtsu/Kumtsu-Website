@@ -1,10 +1,13 @@
 {
-  "rewrites": [
+  "redirects": [
     {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "order.kumtsu.com" }],
-      "destination": "/order/:path*"
-    },
+      "destination": "https://www.kumtsu.com/order/:path*",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
     { "source": "/internal/login", "destination": "/internal/login.html" },
     { "source": "/internal/forgot-password", "destination": "/internal/forgot-password.html" },
     { "source": "/internal/reset-password", "destination": "/internal/reset-password.html" },
