@@ -29,7 +29,8 @@ async function readJson(req) {
 async function callSupabase(path, options = {}, useServiceRole = false) {
   const { url, publishableKey, serviceKey } = env();
   const key = useServiceRole ? serviceKey : publishableKey;
-  const headers = { apikey: key, ...(useServiceRole ? { Authorization: `Bearer ${serviceKey}` } : {}), ...options.headers };
+  const serviceAuthorization = useServiceRole && !serviceKey.startsWith('sb_secret_') ? { Authorization: `Bearer ${serviceKey}` } : {};
+  const headers = { apikey: key, ...serviceAuthorization, ...options.headers };
   const response = await fetch(`${url}${path}`, { ...options, headers });
   const text = await response.text();
   let data = {};
