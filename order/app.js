@@ -471,7 +471,7 @@ function syncBrand(){
   $("#successTitle").textContent=`ขอบคุณที่สั่ง${brand?.short||brand?.name||"อาหาร"}`;
 }
 function renderBrands(){
-  brandTabs.innerHTML=brands.map(brand=>`<button type="button" class="brand-tab ${brand.id===state.brand?"active":""}" data-brand="${brand.id}" style="--brand-accent:${brand.accent}">${brand.logo?`<img src="${brand.logo}" alt="">`:`<span>${brand.monogram||brand.short.charAt(0)}</span>`}<strong>${brand.short}</strong></button>`).join("");
+  brandTabs.innerHTML=brands.map(brand=>`<button type="button" class="brand-tab ${brand.id===state.brand?"active":""}" data-brand="${brand.id}" style="--brand-accent:${brand.accent}">${brand.logo?`<img src="${brand.logo}" alt="โลโก้ ${brand.name}">`:`<span>${brand.monogram||(brand.name||brand.short).charAt(0)}</span>`}<strong>${brand.name||brand.short}</strong></button>`).join("");
 }
 function renderTabs(){tabs.innerHTML=categories.map(c=>`<button type="button" class="${c.id===state.category?"active":""}" data-category="${c.id}">${c.label}</button>`).join("")}
 function renderMenu(){
