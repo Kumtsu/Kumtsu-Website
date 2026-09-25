@@ -1,5 +1,10 @@
 {
   "rewrites": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "order.kumtsu.com" }],
+      "destination": "/order/:path*"
+    },
     { "source": "/internal/login", "destination": "/internal/login.html" },
     { "source": "/internal/forgot-password", "destination": "/internal/forgot-password.html" },
     { "source": "/internal/reset-password", "destination": "/internal/reset-password.html" },
