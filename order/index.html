@@ -1,14 +1,176 @@
 <!doctype html>
 <html lang="th">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="refresh" content="0;url=https://kumtsu-order.kumtsu-7034.chatgpt.site/">
-  <meta name="robots" content="noindex">
-  <title>กำลังไปยังหน้าสั่งซื้อ | Kumtsu</title>
-  <script>window.location.replace('https://kumtsu-order.kumtsu-7034.chatgpt.site/');</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#151414">
+  <meta name="description" content="สั่งอาหารร้านคุ้มสึ ข้าวหน้าพ่นไฟ หม่าล่า ยากินิกุ และเมนูอร่อยอีกมากมาย">
+  <title>คุ้มสึ — สั่งอาหารออนไลน์</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Kanit:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="menu-data.js" defer></script>
+  <script src="app.js" defer></script>
 </head>
-<body style="margin:0;background:#121212;color:#f5f5f5;font-family:Helvetica Neue,Arial,sans-serif;display:grid;place-items:center;min-height:100vh">
-  <p>กำลังเปิดหน้าสั่งซื้อ… <a href="https://kumtsu-order.kumtsu-7034.chatgpt.site/" style="color:#1ca650">กดที่นี่หากหน้าไม่เปลี่ยนอัตโนมัติ</a></p>
+<body>
+  <header class="site-header">
+    <div class="topbar">
+      <a class="brand" href="#top" aria-label="คุ้มสึ หน้าแรก">
+        <img src="assets/kumtsu-logo.jpg" alt="โลโก้คุ้มสึ">
+        <span><strong>คุ้มสึ</strong><small>KUMTSU</small></span>
+      </a>
+      <label class="header-search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <input id="headerSearch" type="search" placeholder="ค้นหาเมนูที่อยากกิน" autocomplete="off">
+        <button type="button" id="headerSearchButton">ค้นหา</button>
+      </label>
+      <div class="top-actions">
+        <a class="home-link" href="https://kumtsu.com" aria-label="กลับหน้าแรก Kumtsu.com">หน้าแรก</a>
+        <a class="line-link" href="https://lin.ee/XJMeWHK" target="_blank" rel="noopener">LINE @kumtsu</a>
+        <button class="cart-button" id="openCart" type="button" aria-label="เปิดตะกร้าสินค้า">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L21 7H7M10 20a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm9 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"/></svg>
+          <span>ตะกร้า</span><b id="cartCount">0</b>
+        </button>
+      </div>
+    </div>
+    <div class="servicebar">
+      <strong>🛵 จัดส่งถึงบ้าน</strong>
+      <span>ที่อยู่ของคุณ · <b>ระบุที่อยู่ตอนสั่งซื้อ</b></span>
+      <a href="#delivery-apps">สั่งผ่านแอป</a>
+      <a href="#store-info">ดูข้อมูลร้าน</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <img src="assets/kumtsu-cover.jpg" alt="เมนูข้าวหน้าเนื้อพ่นไฟและเครื่องเคียงของร้านคุ้มสึ">
+      <a class="hero-cta" href="#menu">สั่งเลย <span aria-hidden="true">→</span></a>
+    </section>
+
+    <section class="promotions" aria-labelledby="recommendedTitle">
+      <div class="promo-title"><span></span><h2 id="recommendedTitle">เมนูเด็ดและสิทธิพิเศษ</h2></div>
+      <div class="promo-grid">
+        <a class="promo-card featured-food" href="#menu" data-promo-category="kumtsu-category-1">
+          <img src="assets/kumtsu-hero.png" alt="ข้าวหน้าหมูพ่นไฟ ไข่ออนเซ็น และกิมจิ">
+          <span class="promo-copy"><small>เมนูขายดี</small><strong>ข้าวหน้าพ่นไฟ</strong><em>เริ่มต้น 119 บาท</em></span>
+        </a>
+        <a class="promo-card points-card" href="https://lin.ee/XJMeWHK" target="_blank" rel="noopener">
+          <span class="points-number">1<span>บาท</span></span>
+          <span class="promo-copy"><small>สมาชิกคุ้มสึ</small><strong>= 1 แต้ม</strong><em>สมัครและเช็กแต้มทาง LINE</em></span>
+        </a>
+        <a class="promo-card mala-card" href="#menu" data-promo-category="kumtsu-category-2">
+          <span class="mala-fire">火</span>
+          <span class="promo-copy"><small>เผ็ดหอมถึงใจ</small><strong>หม่าล่าไฟลุก</strong><em>เริ่มต้น 119 บาท</em></span>
+        </a>
+      </div>
+    </section>
+
+    <section class="delivery-apps" id="delivery-apps" aria-labelledby="deliveryAppsTitle">
+      <div class="delivery-heading">
+        <div><span class="section-kicker">เลือกช่องทางที่สะดวก</span><h2 id="deliveryAppsTitle">สั่งผ่าน แอพ เดลิเวอรี่</h2></div>
+        <p>กดแล้วไปยังหน้าร้านในแอปได้ทันที</p>
+      </div>
+      <div class="delivery-groups">
+        <article class="delivery-group zoyy-group">
+          <div class="delivery-brand"><span>Z</span><div><small>ร้าน</small><h3>Zoyy</h3></div></div>
+          <a class="delivery-button grab" href="https://grb.to/4bfNq9E" target="_blank" rel="noopener"><span class="app-mark"><img src="assets/grab.svg" alt=""></span><span><small>สั่งผ่าน</small><strong>GrabFood</strong></span><b>→</b></a>
+        </article>
+        <article class="delivery-group kumtsu-group">
+          <div class="delivery-brand"><img src="assets/kumtsu-logo.jpg" alt=""><div><small>ร้าน</small><h3>Kumtsu</h3></div></div>
+          <div class="delivery-options">
+            <a class="delivery-button grab" href="https://tinyurl.com/te65v6xn" target="_blank" rel="noopener"><span class="app-mark"><img src="assets/grab.svg" alt=""></span><span><small>สั่งผ่าน</small><strong>GrabFood</strong></span><b>→</b></a>
+            <a class="delivery-button shopee" href="https://shp.ee/3jjdkbh" target="_blank" rel="noopener"><span class="app-mark"><img src="assets/shopee.svg" alt=""></span><span><small>สั่งผ่าน</small><strong>ShopeeFood</strong></span><b>→</b></a>
+            <a class="delivery-button lineman" href="https://lineman.onelink.me/1N3T/3u1admjy" target="_blank" rel="noopener"><span class="app-mark"><img src="assets/lineman.png" alt=""></span><span><small>สั่งผ่าน</small><strong>LINE MAN</strong></span><b>→</b></a>
+            <a class="delivery-button robinhood" href="https://go.rbh.app/PAgI/ogkumtsu" target="_blank" rel="noopener"><span class="app-mark"><img src="assets/robinhood.png" alt=""></span><span><small>สั่งผ่าน</small><strong>Robinhood</strong></span><b>→</b></a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="menu-section" id="menu">
+      <div class="menu-heading">
+      <div><span class="section-kicker">เลือกแบรนด์ที่อยากทาน</span><h2 id="menuBrandTitle">เมนูคุ้มสึ</h2></div>
+        <label class="search-box">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <input id="searchInput" type="search" placeholder="ค้นหาเมนู" autocomplete="off">
+        </label>
+      </div>
+      <nav class="brand-tabs" id="brandTabs" aria-label="เลือกแบรนด์"></nav>
+      <nav class="category-tabs" id="categoryTabs" aria-label="หมวดหมู่อาหาร"></nav>
+      <div class="menu-grid" id="menuGrid"></div>
+      <div class="empty-state" id="emptyState" hidden>
+        <span>⌕</span><h3>ไม่พบเมนูที่ค้นหา</h3><p>ลองใช้คำค้นอื่น หรือเลือกดูทุกเมนู</p>
+      </div>
+    </section>
+
+    <section class="store-info" id="store-info">
+      <div class="store-info-inner">
+        <div class="store-brand">
+          <img src="assets/kumtsu-logo.jpg" alt="โลโก้ร้านคุ้มสึ">
+          <div><h2>คุ้มสึ</h2><p>บริษัท คุ้มสึ จำกัด (สำนักงานใหญ่)</p></div>
+        </div>
+        <div class="info-block"><small>เวลาทำการ</small><strong>วันจันทร์–ศุกร์</strong><span>09:00–18:00 น.</span></div>
+        <div class="info-block"><small>ที่อยู่</small><strong>19 พระรามเก้า 57/1</strong><span>(วิเศษสุข 2) แขวงพัฒนาการ เขตสวนหลวง กรุงเทพฯ 10250</span></div>
+        <div class="contact-panel">
+          <small>ช่องทางการติดต่อ</small>
+          <div class="social-links">
+            <a class="contact-phone" href="tel:020558298"><span class="contact-icon phone-contact-icon" aria-hidden="true">☎</span><span class="contact-label">โทร 02-055-8298</span></a>
+            <a class="contact-line" href="https://lin.ee/XJMeWHK" target="_blank" rel="noopener"><span class="contact-icon"><img src="assets/line.svg" alt=""></span><span class="contact-label">LINE @kumtsu</span></a>
+            <a class="contact-facebook" href="https://www.facebook.com/kumtzzz" target="_blank" rel="noopener"><span class="contact-icon"><img src="assets/facebook.svg" alt=""></span><span class="contact-label">Facebook คุ้มสึ</span></a>
+            <a class="contact-instagram" href="https://www.instagram.com/kumtsu_th" target="_blank" rel="noopener"><span class="contact-icon"><img src="assets/instagram.svg" alt=""></span><span class="contact-label">Instagram @kumtsu_th</span></a>
+            <a class="contact-tiktok" href="https://www.tiktok.com/@kumtsuth" target="_blank" rel="noopener"><span class="contact-icon"><img src="assets/tiktok.svg" alt=""></span><span class="contact-label">TikTok @kumtsuth</span></a>
+          </div>
+        </div>
+      </div>
+      <footer><span>© คุ้มสึ</span><span>ร้านอาหารจานด่วน · Dine-in · Outdoor seating</span></footer>
+    </section>
+  </main>
+
+  <button class="mobile-cart" id="mobileCart" type="button" hidden>
+    <span><b id="mobileCartCount">0</b> รายการ</span><strong>ดูตะกร้า · <span id="mobileCartTotal">฿0</span></strong>
+  </button>
+
+  <div class="overlay" id="overlay" hidden></div>
+  <aside class="cart-drawer" id="cartDrawer" aria-labelledby="cartTitle" aria-hidden="true">
+    <div class="drawer-head">
+      <div><span class="section-kicker">ออเดอร์ของคุณ</span><h2 id="cartTitle">ตะกร้า</h2></div>
+      <button class="icon-button" id="closeCart" type="button" aria-label="ปิดตะกร้า">×</button>
+    </div>
+    <div class="cart-body">
+      <div class="cart-empty" id="cartEmpty"><span>火</span><h3>ตะกร้ายังว่าง</h3><p>เลือกเมนูที่ชอบ แล้วกดเพิ่มได้เลย</p></div>
+      <div class="cart-list" id="cartList"></div>
+      <section class="checkout-form" id="checkoutForm" hidden>
+        <h3>ข้อมูลรับอาหาร</h3>
+        <div class="fulfilment" role="group" aria-label="วิธีรับอาหาร">
+          <button class="active" type="button" data-method="delivery">จัดส่ง</button>
+          <button type="button" data-method="pickup">รับที่ร้าน</button>
+        </div>
+        <label>ชื่อผู้สั่ง<input id="customerName" type="text" placeholder="กรอกชื่อ" required></label>
+        <label>เบอร์โทรศัพท์<input id="customerPhone" type="tel" inputmode="tel" placeholder="08x-xxx-xxxx" required></label>
+        <label id="addressField">ที่อยู่จัดส่ง<textarea id="customerAddress" rows="2" placeholder="บ้านเลขที่ ถนน เขต/อำเภอ"></textarea></label>
+        <label>หมายเหตุ (ถ้ามี)<textarea id="orderNote" rows="2" placeholder="เช่น ไม่ใส่ต้นหอม"></textarea></label>
+      </section>
+    </div>
+    <div class="cart-footer" id="cartFooter" hidden>
+      <div class="summary-row"><span>รวมค่าอาหาร</span><strong id="subtotal">฿0</strong></div>
+      <p>ค่าจัดส่งคิดตามระยะทาง</p>
+      <button class="checkout-button" id="checkoutButton" type="button">ดำเนินการต่อ</button>
+    </div>
+  </aside>
+
+  <dialog class="success-dialog" id="successDialog">
+    <button class="dialog-close" id="closeSuccess" type="button" aria-label="ปิด">×</button>
+    <span class="success-icon">✓</span>
+    <p class="section-kicker">ส่งออเดอร์แล้ว</p>
+    <h2 id="successTitle">ขอบคุณที่สั่งคุ้มสึ</h2>
+    <p>คัดลอกรายการแล้วส่งให้ร้านทาง LINE เพื่อยืนยันออเดอร์</p>
+    <strong id="orderNumber">KM0000</strong>
+    <div class="success-actions">
+      <button id="copyOrderButton" type="button">คัดลอกรายการ</button>
+      <a id="lineOrderButton" href="https://lin.ee/XJMeWHK" target="_blank" rel="noopener">ส่งออเดอร์ทาง LINE</a>
+    </div>
+    <button class="back-menu" id="doneButton" type="button">กลับไปดูเมนู</button>
+  </dialog>
 </body>
 </html>
