@@ -14,7 +14,13 @@ async function loadDashboard() {
   container.replaceChildren(...data.systems.map((system) => {
     const card = document.createElement(system.url ? 'a' : 'article');
     card.className = `system-card${system.url ? '' : ' is-disabled'}`;
-    if (system.url) { card.href = system.url; card.target = '_blank'; card.rel = 'noopener noreferrer'; }
+    if (system.url) {
+      card.href = system.url;
+      if (/^https?:\/\//.test(system.url)) {
+        card.target = '_blank';
+        card.rel = 'noopener noreferrer';
+      }
+    }
     else card.setAttribute('aria-disabled', 'true');
     const number = document.createElement('span'); number.className = 'system-number'; number.textContent = system.id;
     const content = document.createElement('div');
