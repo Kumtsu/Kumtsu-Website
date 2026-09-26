@@ -13,6 +13,7 @@
     { "source": "/internal/reset-password", "destination": "/internal/reset-password.html" },
     { "source": "/internal/profile", "destination": "/internal/profile.html" },
     { "source": "/internal/dashboard", "destination": "/internal/dashboard.html" },
+    { "source": "/internal/rating-feedback", "destination": "/internal/rating-feedback.html" },
     { "source": "/internal/admin", "destination": "/internal/admin/index.html" },
     { "source": "/internal/admin/", "destination": "/internal/admin/index.html" }
   ],
