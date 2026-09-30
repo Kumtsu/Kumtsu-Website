@@ -454,7 +454,7 @@ const legacyMenu=[
     "image": "assets/menu/BV0002.jpg"
   }
 ];
-const brands=window.KUMTSU_CATALOG?.brands||[];
+let brands=window.KUMTSU_CATALOG?.brands||[];
 const state={brand:"kumtsu",category:"all",query:"",cart:{},checkout:false,method:"delivery",lastOrderText:""};
 let categories=[];
 let menu=[];
@@ -465,7 +465,7 @@ const money=n=>`฿${n.toLocaleString("th-TH")}`;
 function activeBrand(){return brands.find(brand=>brand.id===state.brand)||brands[0]}
 function syncBrand(){
   const brand=activeBrand();
-  menu=brand?.items||[];
+  menu=(brand?.items||[]).filter(item=>item.available!==false);
   categories=[{id:"all",label:"ทั้งหมด"},...(brand?.categories||[])];
   $("#menuBrandTitle").textContent=`เมนู${brand?.name||""}`;
   $("#successTitle").textContent=`ขอบคุณที่สั่ง${brand?.short||brand?.name||"อาหาร"}`;
@@ -478,7 +478,7 @@ function renderMenu(){
   const q=state.query.trim().toLowerCase();
   const categoryOrder=new Map(categories.map((category,index)=>[category.id,index]));
   const items=menu.filter(m=>(state.category==="all"||m.category===state.category)&&(!q||`${m.name} ${m.en} ${m.id}`.toLowerCase().includes(q))).sort((a,b)=>categoryOrder.get(a.category)-categoryOrder.get(b.category));
-  grid.innerHTML=items.map(m=>`<article class="menu-card"><div class="menu-photo"><img src="${m.image}" alt="${m.name}" loading="lazy" decoding="async"></div><div class="menu-card-content"><div class="card-top"><span class="menu-code">${m.id}</span>${/พ่นไฟ|หม่าล่า/.test(`${m.name} ${categories.find(c=>c.id===m.category)?.label||""}`)?'<span class="flame-badge">🔥 พ่นไฟ</span>':""}</div><h3>${m.name}</h3>${m.en?`<p class="en">${m.en}</p>`:""}<div class="card-bottom"><span class="price">${money(m.price)}</span><button class="add-button" type="button" data-add="${m.key}">+ เพิ่ม</button></div></div></article>`).join("");
+  grid.innerHTML=items.map(m=>{const fallbackBadge=/พ่นไฟ|หม่าล่า/.test(`${m.name} ${categories.find(c=>c.id===m.category)?.label||""}`);const badge=m.badge?.enabled===true?m.badge.text:(m.badge?"":fallbackBadge?"พ่นไฟ":"");return `<article class="menu-card"><div class="menu-photo"><img src="${m.image}" alt="${m.name}" loading="lazy" decoding="async"></div><div class="menu-card-content"><div class="card-top"><span class="menu-code">${m.id}</span>${badge?`<span class="flame-badge">🔥 ${badge}</span>`:""}</div><h3>${m.name}</h3>${m.en?`<p class="en">${m.en}</p>`:""}<div class="card-bottom"><span class="price">${money(m.price)}</span><button class="add-button" type="button" data-add="${m.key}">+ เพิ่ม</button></div></div></article>`}).join("");
   $("#emptyState").hidden=items.length>0;
 }
 function cartItems(){return Object.entries(state.cart).map(([key,qty])=>({item:menu.find(m=>m.key===key),qty})).filter(x=>x.item)}
@@ -531,7 +531,16 @@ document.querySelectorAll("[data-method]").forEach(b=>b.addEventListener("click"
 $("#copyOrderButton").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(state.lastOrderText);$("#copyOrderButton").textContent="✓ คัดลอกแล้ว"}catch{$("#copyOrderButton").textContent="กดค้างเพื่อคัดลอก"}});
 [$("#closeSuccess"),$("#doneButton")].forEach(b=>b.addEventListener("click",()=>$("#successDialog").close()));
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&drawer.classList.contains("open"))closeCart()});
-syncBrand();renderBrands();renderTabs();renderMenu();renderCart();
+async function initializeCatalog(){
+  try{
+    const response=await fetch('/api/menu',{cache:'no-store'});
+    const data=await response.json();
+    if(response.ok&&Array.isArray(data.catalog?.brands)&&data.catalog.brands.length)brands=data.catalog.brands;
+  }catch{}
+  if(!brands.some(brand=>brand.id===state.brand))state.brand=brands[0]?.id||'kumtsu';
+  syncBrand();renderBrands();renderTabs();renderMenu();renderCart();
+}
+initializeCatalog();
 
 function registerWebMCP(){
   const context=document.modelContext;if(!context?.registerTool)return;

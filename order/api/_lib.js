@@ -20,12 +20,12 @@ function send(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
-async function readJson(req) {
+async function readJson(req, maxBytes = 1_000_000) {
   if (req.body && typeof req.body === 'object') return req.body;
   let raw = '';
   for await (const chunk of req) {
     raw += chunk;
-    if (raw.length > 1_000_000) throw new Error('Payload too large');
+    if (raw.length > maxBytes) throw new Error('Payload too large');
   }
   return raw ? JSON.parse(raw) : {};
 }
@@ -59,4 +59,12 @@ async function currentAdmin(req) {
   return { token, user: userResult.data, email };
 }
 
-module.exports = { ADMIN_EMAILS, callSupabase, currentAdmin, env, readJson, send };
+async function readMenuCatalog(fallbackCatalog) {
+  const result = await callSupabase('/rest/v1/menu_catalog?id=eq.default&select=catalog,updated_at&limit=1', {}, true);
+  if (!result.response.ok || !Array.isArray(result.data) || !result.data[0]?.catalog?.brands) {
+    return { catalog: fallbackCatalog, updatedAt: null, source: 'fallback' };
+  }
+  return { catalog: result.data[0].catalog, updatedAt: result.data[0].updated_at, source: 'database' };
+}
+
+module.exports = { ADMIN_EMAILS, callSupabase, currentAdmin, env, readJson, readMenuCatalog, send };

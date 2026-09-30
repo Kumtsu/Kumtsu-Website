@@ -4,7 +4,7 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0b0f0c"><meta name="robots" content="noindex,nofollow">
   <title>หลังบ้านออเดอร์ | Kumtsu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Kanit:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css"><script src="admin.js" defer></script>
+  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="menu-manager.css"><script src="admin.js" defer></script>
 </head>
 <body><main>
   <section class="login-view" id="loginView"><form class="login-card" id="loginForm">
@@ -13,8 +13,16 @@
     <p class="form-message" id="loginMessage" role="alert"></p><button type="submit">เข้าสู่ระบบ</button><a href="../">← กลับหน้าสั่งอาหาร</a>
   </form></section>
   <section class="dashboard" id="dashboard" hidden>
-    <header><div class="identity"><img src="../assets/kumtsu-logo.jpg" alt=""><div><p>KUMTSU ORDER</p><h1>ออเดอร์ทั้งหมด</h1></div></div><div class="header-actions"><span id="viewer"></span><button id="soundButton" type="button">🔔 เสียงแจ้งเตือน</button><button id="logoutButton" type="button">ออกจากระบบ</button></div></header>
+    <header><div class="identity"><img src="../assets/kumtsu-logo.jpg" alt=""><div><p>KUMTSU ORDER</p><h1>ออเดอร์ทั้งหมด</h1></div></div><div class="header-actions"><span id="viewer"></span><button id="menuShortcut" type="button">☰ จัดการเมนู</button><button id="soundButton" type="button">🔔 เสียงแจ้งเตือน</button><button id="logoutButton" type="button">ออกจากระบบ</button></div></header>
     <div class="toolbar"><label class="search"><span>ค้นหา</span><input id="searchInput" type="search" placeholder="รหัสออเดอร์ ชื่อ หรือเบอร์โทร"></label><label><span>สถานะ</span><select id="statusFilter"><option value="all">ทั้งหมด</option><option value="new">ออเดอร์ใหม่</option><option value="confirmed">ยืนยันแล้ว</option><option value="preparing">กำลังทำ</option><option value="ready">พร้อมส่ง</option><option value="completed">เสร็จสิ้น</option><option value="cancelled">ยกเลิก</option></select></label><button id="refreshButton" type="button">↻ อัปเดต</button></div>
     <div class="stats" id="stats"></div><p class="system-message" id="systemMessage" role="status"></p><div class="orders" id="orders"></div>
+    <section class="menu-manager" id="menuManager">
+      <button class="menu-manager-toggle" id="menuManagerToggle" type="button" aria-expanded="false"><span><small>KUMTSU CATALOG</small><strong>จัดการเมนู</strong></span><span id="menuToggleLabel">เปิดส่วนจัดการ ↓</span></button>
+      <div class="menu-manager-body" id="menuManagerBody" hidden>
+        <div class="menu-manager-toolbar"><label><span>แบรนด์</span><select id="menuBrandFilter"></select></label><label class="menu-search"><span>ค้นหาเมนู</span><input id="menuSearchInput" type="search" placeholder="ชื่อหรือรหัสเมนู"></label><button id="saveMenuButton" class="primary" type="button">บันทึกเมนูทั้งหมด</button></div>
+        <p class="menu-message" id="menuMessage" role="status"></p>
+        <div class="menu-list" id="menuList"></div>
+      </div>
+    </section>
   </section>
 </main></body></html>

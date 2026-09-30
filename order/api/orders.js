@@ -1,5 +1,5 @@
-const catalog = require('../menu-data.js');
-const { callSupabase, readJson, send } = require('./_lib');
+const fallbackCatalog = require('../menu-data.js');
+const { callSupabase, readJson, readMenuCatalog, send } = require('./_lib');
 
 function clean(value, max = 500) {
   return String(value || '').trim().replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, max);
@@ -46,6 +46,7 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return send(res, 405, { message: 'Method not allowed' });
   try {
     const body = await readJson(req);
+    const { catalog } = await readMenuCatalog(fallbackCatalog);
     const brand = catalog.brands.find(entry => entry.id === clean(body.brandId, 80));
     if (!brand) return send(res, 400, { message: 'ไม่พบแบรนด์ที่เลือก' });
     if (!Array.isArray(body.items) || !body.items.length || body.items.length > 50) return send(res, 400, { message: 'รายการอาหารไม่ถูกต้อง' });
@@ -54,7 +55,7 @@ module.exports = async function handler(req, res) {
     const items = body.items.map(entry => {
       const menu = brand.items.find(item => item.id === clean(entry.id, 80));
       const quantity = Number(entry.quantity);
-      if (!menu || !Number.isInteger(quantity) || quantity < 1 || quantity > 20 || !Number.isFinite(menu.price)) throw new Error('INVALID_ITEM');
+      if (!menu || menu.available === false || !Number.isInteger(quantity) || quantity < 1 || quantity > 20 || !Number.isFinite(menu.price)) throw new Error('INVALID_ITEM');
       totalQuantity += quantity;
       return { id: menu.id, name: menu.name, quantity, unit_price: menu.price, line_total: menu.price * quantity };
     });
