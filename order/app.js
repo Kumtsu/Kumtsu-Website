@@ -461,6 +461,21 @@ let menu=[];
 const $=s=>document.querySelector(s);
 const grid=$("#menuGrid"),tabs=$("#categoryTabs"),brandTabs=$("#brandTabs"),drawer=$("#cartDrawer"),overlay=$("#overlay");
 const money=n=>`฿${n.toLocaleString("th-TH")}`;
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const defaultPage={hero:{image:"assets/kumtsu-cover.jpg",position:"center"},promotionsTitle:"เมนูเด็ดและสิทธิพิเศษ",promotions:[{id:"featured",enabled:true,eyebrow:"เมนูขายดี",title:"ข้าวหน้าพ่นไฟ",detail:"เริ่มต้น 119 บาท",image:"assets/kumtsu-hero.png",url:"#menu"},{id:"points",enabled:true,eyebrow:"สมาชิกคุ้มสึ",title:"= 1 แต้ม",detail:"สมัครและเช็กแต้มทาง LINE",image:"",url:"https://lin.ee/XJMeWHK"},{id:"mala",enabled:true,eyebrow:"เผ็ดหอมถึงใจ",title:"หม่าล่าไฟลุก",detail:"เริ่มต้น 119 บาท",image:"",url:"#menu"}],deliveryTitle:"สั่งผ่าน แอพ เดลิเวอรี่",deliverySubtitle:"กดแล้วไปยังหน้าร้านในแอปได้ทันที"};
+const defaultDelivery={kumtsu:[{id:"grab",name:"GrabFood",url:"https://tinyurl.com/te65v6xn",icon:"assets/grab.svg",enabled:true},{id:"shopee",name:"ShopeeFood",url:"https://shp.ee/3jjdkbh",icon:"assets/shopee.svg",enabled:true},{id:"lineman",name:"LINE MAN",url:"https://lineman.onelink.me/1N3T/3u1admjy",icon:"assets/lineman.png",enabled:true},{id:"robinhood",name:"Robinhood",url:"https://go.rbh.app/PAgI/ogkumtsu",icon:"assets/robinhood.png",enabled:true}],"zoyy-noodle":[{id:"grab",name:"GrabFood",url:"https://grb.to/4bfNq9E",icon:"assets/grab.svg",enabled:true}]};
+
+function hydrateContent(){
+  window.KUMTSU_CATALOG.page={...defaultPage,...(window.KUMTSU_CATALOG.page||{}),hero:{...defaultPage.hero,...(window.KUMTSU_CATALOG.page?.hero||{})},promotions:Array.isArray(window.KUMTSU_CATALOG.page?.promotions)?window.KUMTSU_CATALOG.page.promotions:defaultPage.promotions};
+  brands.forEach(brand=>{if(!Array.isArray(brand.deliveryApps))brand.deliveryApps=defaultDelivery[brand.id]||[]});
+}
+function renderPageContent(){
+  const page=window.KUMTSU_CATALOG.page||defaultPage,hero=$("#heroImage");hero.src=page.hero.image;hero.style.objectPosition=`${page.hero.position||"center"} center`;$("#recommendedTitle").textContent=page.promotionsTitle;
+  const kumtsu=brands.find(brand=>brand.id==="kumtsu")||brands[0];if(kumtsu){const headerLogo=document.querySelector('.brand img'),headerName=document.querySelector('.brand strong'),storeLogo=document.querySelector('.store-brand img'),storeName=document.querySelector('.store-brand h2');if(headerLogo)headerLogo.src=kumtsu.logo;if(headerName)headerName.textContent=kumtsu.name;if(storeLogo)storeLogo.src=kumtsu.logo;if(storeName)storeName.textContent=kumtsu.name}
+  $("#promoGrid").innerHTML=(page.promotions||[]).filter(p=>p.enabled!==false).map((p,index)=>`<a class="promo-card ${p.image?"featured-food":index===1?"points-card":"mala-card"}" href="${esc(p.url||"#menu")}" ${(p.url||"").startsWith("http")?'target="_blank" rel="noopener"':""}>${p.image?`<img src="${esc(p.image)}" alt="${esc(p.title)}">`:index===1?'<span class="points-number">★</span>':'<span class="mala-fire">火</span>'}<span class="promo-copy"><small>${esc(p.eyebrow)}</small><strong>${esc(p.title)}</strong><em>${esc(p.detail)}</em></span></a>`).join("");
+  $("#deliveryAppsTitle").textContent=page.deliveryTitle;$("#deliveryAppsSubtitle").textContent=page.deliverySubtitle;
+  $("#deliveryGroups").innerHTML=brands.filter(brand=>(brand.deliveryApps||[]).some(app=>app.enabled!==false)).map(brand=>`<article class="delivery-group"><div class="delivery-brand">${brand.logo?`<img src="${esc(brand.logo)}" alt="">`:`<span>${esc(brand.monogram||(brand.name||"").charAt(0))}</span>`}<div><small>ร้าน</small><h3>${esc(brand.name)}</h3></div></div><div class="delivery-options">${brand.deliveryApps.filter(app=>app.enabled!==false).map(app=>`<a class="delivery-button" href="${esc(app.url)}" target="_blank" rel="noopener"><span class="app-mark"><img src="${esc(app.icon)}" alt=""></span><span><small>สั่งผ่าน</small><strong>${esc(app.name)}</strong></span><b>→</b></a>`).join("")}</div></article>`).join("");
+}
 
 function activeBrand(){return brands.find(brand=>brand.id===state.brand)||brands[0]}
 function syncBrand(){
@@ -535,8 +550,9 @@ async function initializeCatalog(){
   try{
     const response=await fetch('/api/menu',{cache:'no-store'});
     const data=await response.json();
-    if(response.ok&&Array.isArray(data.catalog?.brands)&&data.catalog.brands.length)brands=data.catalog.brands;
+    if(response.ok&&Array.isArray(data.catalog?.brands)&&data.catalog.brands.length){window.KUMTSU_CATALOG=data.catalog;brands=data.catalog.brands}
   }catch{}
+  hydrateContent();renderPageContent();
   if(!brands.some(brand=>brand.id===state.brand))state.brand=brands[0]?.id||'kumtsu';
   syncBrand();renderBrands();renderTabs();renderMenu();renderCart();
 }

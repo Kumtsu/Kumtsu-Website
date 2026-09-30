@@ -7,9 +7,15 @@ function clean(value, max = 500) {
 
 function safeImage(value) {
   const image = clean(value, 1000);
-  if (/^assets\/menu\/[a-zA-Z0-9_./-]+\.(?:jpg|jpeg|png|webp)$/i.test(image)) return image;
+  if (/^assets\/[a-zA-Z0-9_./-]+\.(?:jpg|jpeg|png|webp|svg)$/i.test(image)) return image;
   if (/^https:\/\/[a-zA-Z0-9.-]+\/[^\s"'<>]+$/i.test(image)) return image;
   throw new Error('INVALID_ITEM');
+}
+
+function safeLink(value) {
+  const link = clean(value, 1000);
+  if (/^#[a-zA-Z0-9_-]+$/.test(link) || /^https:\/\/[a-zA-Z0-9.-]+\/[^\s"'<>]*$/i.test(link)) return link;
+  throw new Error('INVALID_CATALOG');
 }
 
 function normalizeCatalog(input) {
@@ -47,19 +53,46 @@ function normalizeCatalog(input) {
         sortOrder: Number.isInteger(item.sortOrder) ? item.sortOrder : itemIndex,
       };
     });
+    const deliveryApps = (Array.isArray(brand.deliveryApps) ? brand.deliveryApps : []).slice(0, 12).map((app, index) => ({
+      id: clean(app.id, 80) || `delivery-${index + 1}`,
+      name: clean(app.name, 100) || 'Delivery',
+      url: safeLink(app.url),
+      icon: safeImage(app.icon),
+      enabled: app.enabled !== false,
+    }));
     return {
       id,
       name: clean(brand.name, 160) || id,
       short: clean(brand.short, 100),
       monogram: clean(brand.monogram, 20),
-      logo: clean(brand.logo, 1000),
+      logo: safeImage(brand.logo),
       accent: clean(brand.accent, 30),
       categories,
       items,
+      deliveryApps,
       sortOrder: Number.isInteger(brand.sortOrder) ? brand.sortOrder : brandIndex,
     };
   });
-  return { brands };
+  const pageInput = input.page || {};
+  const promotions = (Array.isArray(pageInput.promotions) ? pageInput.promotions : []).slice(0, 8).map((promotion, index) => ({
+    id: clean(promotion.id, 80) || `promotion-${index + 1}`,
+    enabled: promotion.enabled !== false,
+    eyebrow: clean(promotion.eyebrow, 100),
+    title: clean(promotion.title, 160),
+    detail: clean(promotion.detail, 200),
+    image: promotion.image ? safeImage(promotion.image) : '',
+    url: safeLink(promotion.url || '#menu'),
+  }));
+  return {
+    brands,
+    page: {
+      hero: { image: safeImage(pageInput.hero?.image || 'assets/kumtsu-cover.jpg'), position: ['left', 'center', 'right'].includes(pageInput.hero?.position) ? pageInput.hero.position : 'center' },
+      promotionsTitle: clean(pageInput.promotionsTitle, 160) || 'เมนูเด็ดและสิทธิพิเศษ',
+      promotions,
+      deliveryTitle: clean(pageInput.deliveryTitle, 160) || 'สั่งผ่าน แอพ เดลิเวอรี่',
+      deliverySubtitle: clean(pageInput.deliverySubtitle, 200) || 'กดแล้วไปยังหน้าร้านในแอปได้ทันที',
+    },
+  };
 }
 
 module.exports = async function handler(req, res) {
