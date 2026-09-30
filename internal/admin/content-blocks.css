@@ -1,0 +1,12 @@
+.block-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.block-heading > div { display: flex; gap: 8px; flex-wrap: wrap; }
+.block-list { display: grid; gap: 12px; margin-top: 12px; }
+.content-block { padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: #f8faf8; }

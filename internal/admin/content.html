@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>จัดการเว็บไซต์ | Kumtsu Admin</title><base href="/internal/"><link rel="stylesheet" href="./admin/content.css"><link rel="stylesheet" href="./admin/content-blocks.css"></head>
+<body>
+  <header class="cms-header"><a class="cms-brand" href="/internal/admin/"><span class="cms-logo">คุ้มสึ</span><span>Website Manager<small>ระบบจัดการเนื้อหาเว็บไซต์</small></span></a><nav><a href="/" target="_blank" rel="noopener">ดูเว็บไซต์ ↗</a><a href="./admin/">จัดการสมาชิก</a><button id="logoutButton" type="button">ออกจากระบบ</button></nav></header>
+  <main class="cms-shell">
+    <aside class="cms-sidebar"><p>จัดการหน้าเว็บ</p><button class="cms-nav is-active" data-page="home">หน้า Home</button><button class="cms-nav" data-page="news">ข่าวสาร &amp; กิจกรรม</button><div class="cms-note"><strong>ขั้นตอนการทำงาน</strong><span>แก้ไข → บันทึกร่าง → ดูตัวอย่าง → เผยแพร่</span></div></aside>
+    <section class="cms-main">
+      <header class="cms-title"><div><p class="eyebrow">CONTENT MANAGEMENT</p><h1 id="pageTitle">จัดการหน้า Home</h1><p id="lastUpdated">กำลังโหลดข้อมูล…</p></div><div class="cms-actions"><button class="button secondary" id="previewButton" type="button">ดูตัวอย่าง</button><button class="button secondary" id="saveButton" type="button">บันทึกร่าง</button><button class="button primary" id="publishButton" type="button">เผยแพร่</button></div></header>
+      <div id="editor" class="cms-editor" aria-live="polite"></div>
+    </section>
+  </main>
+  <template id="imageFieldTemplate"><div class="image-field"><img alt="ตัวอย่างรูป"><div><label class="upload-button">เลือกรูป<input type="file" accept="image/jpeg,image/png,image/webp,image/gif"></label><input class="image-url" type="url" placeholder="หรือวาง URL รูปภาพ"><small>JPG, PNG, WEBP หรือ GIF ไม่เกิน 10 MB</small></div></div></template>
+  <script type="module" src="./admin/content.js"></script>
+</body></html>
