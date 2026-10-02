@@ -41,7 +41,7 @@ test('returns all review records to an active internal user', async (t) => {
   const res = response();
   await handler(request('Bearer valid-token'), res);
   assert.equal(res.statusCode, 200);
-  assert.equal(res.body.records.length, 258);
+  assert.equal(res.body.records.length, 306);
   assert.equal(res.body.profile.status, 'active');
 });
 
