@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#101411">
+  <title>ตัวอย่าง Kumtsu Branch Access</title>
+  <base href="/internal/">
+  <link rel="stylesheet" href="./branch-access.css">
+</head>
+<body>
+  <header class="topbar">
+    <span class="brand"><span class="brand-mark">K</span><span>KUMTSU <small>BRANCH ACCESS · DESIGN PREVIEW</small></span></span>
+    <div class="top-actions">
+      <span class="admin-badge">PREVIEW ONLY</span>
+      <span class="user-name">ข้อมูลจำลอง</span>
+      <a class="back-link" href="https://www.kumtsu.com/internal/dashboard">กลับหน้าหลัก</a>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-heading">
+        <p class="eyebrow">BRANCH DIRECTORY</p>
+        <h1>ข้อมูลเข้าสู่ระบบ<br><span>ทุกสาขา</span></h1>
+        <p class="muted">50 สาขา · 207 แบรนด์ · 829 ช่องทาง</p>
+      </div>
+      <label class="search-field">
+        <span>ค้นหาสาขา</span>
+        <input type="search" placeholder="ชื่อหรือรหัสสาขา" autocomplete="off">
+      </label>
+      <nav class="branch-list" aria-label="รายชื่อสาขา">
+        <button class="branch-item" type="button"><span class="branch-number">BR001</span><strong>สุขุมวิท 31</strong></button>
+        <button class="branch-item" type="button"><span class="branch-number">BR002</span><strong>ราชเทวี</strong></button>
+        <button class="branch-item active" type="button"><span class="branch-number">BR003</span><strong>สาทร</strong></button>
+        <button class="branch-item" type="button"><span class="branch-number">BR004</span><strong>เกษตร</strong></button>
+        <button class="branch-item" type="button"><span class="branch-number">BR005</span><strong>ปิ่นเกล้า</strong></button>
+        <button class="branch-item" type="button"><span class="branch-number">BR006</span><strong>โชคชัย 4</strong></button>
+        <button class="branch-item" type="button"><span class="branch-number">BR007</span><strong>อารีย์</strong></button>
+      </nav>
+    </aside>
+
+    <section class="content">
+      <div id="branchView">
+        <section class="branch-hero">
+          <div>
+            <p class="eyebrow">BRANCH BR003</p>
+            <h2>สาทร</h2>
+            <p class="branch-address">138 ซ.สาทร 11 ถ.สาทรใต้ แขวงยานนาวา เขตสาทร กรุงเทพมหานคร 10120</p>
+          </div>
+          <button class="button secondary" type="button">แก้ไขข้อมูลสาขา</button>
+        </section>
+
+        <div class="branch-meta">
+          <a class="meta-card" href="tel:0801129674"><span>โทรศัพท์</span><strong>0801129674</strong></a>
+          <a class="meta-card" href="#"><span>แผนที่</span><strong>เปิดพิกัด ↗</strong></a>
+        </div>
+
+        <section class="section-heading">
+          <div><p class="eyebrow">ACCOUNTS</p><h3>แบรนด์และช่องทางขาย</h3></div>
+          <p class="muted">1 แบรนด์ · 4 ช่องทางขาย</p>
+        </section>
+
+        <div class="brand-grid">
+          <article class="brand-card">
+            <div class="brand-head">
+              <div class="brand-identity"><img class="brand-logo" src="./branch-access-assets/brands/kumtsu.png" alt="โลโก้คุ้มสึ"><div><h4>คุ้มสึ</h4><span class="brand-code">KS003</span></div></div>
+            </div>
+            <div class="credentials">
+              <div class="credential-row">
+                <div class="credential-copy"><span>บัญชีหลักของแบรนด์</span><strong>sample.branch@kumtsu.com</strong><span>รหัสผ่าน: ••••••••</span></div>
+                <div class="row-actions"><button class="mini-button" type="button">ดูรหัส</button><button class="mini-button" type="button">แก้ไข</button></div>
+              </div>
+            </div>
+            <div class="channel-list">
+              <p class="subsection-label">DELIVERY CHANNELS</p>
+              <div class="channel-row"><div><h5>Lineman</h5><p>sample.branch@kumtsu.com</p></div><div class="row-actions"><button class="mini-button" type="button">ดูรหัส</button><button class="mini-button" type="button">แก้ไข</button></div></div>
+              <div class="channel-row"><div><h5>Grab</h5><p>sample.branch@kumtsu.com</p></div><div class="row-actions"><button class="mini-button" type="button">ดูรหัส</button><button class="mini-button" type="button">แก้ไข</button></div></div>
+              <div class="channel-row"><div><h5>Shopee</h5><p>Sample003</p></div><div class="row-actions"><button class="mini-button" type="button">ดูรหัส</button><button class="mini-button" type="button">แก้ไข</button></div></div>
+            </div>
+            <section class="foodstory-section">
+              <div class="foodstory-heading"><img class="foodstory-logo" src="./branch-access-assets/apps/w-pos.jpeg" alt="FoodStory"><div><h5>FoodStory</h5><span>POS ACCOUNT · แยกจากช่องทางเดลิเวอรี</span></div></div>
+              <div class="channel-row"><div><h5>บัญชี FoodStory</h5><p>sample.pos@kumtsu.com</p></div><div class="row-actions"><button class="mini-button" type="button">ดูรหัส</button><button class="mini-button" type="button">แก้ไข</button></div></div>
+            </section>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <aside class="security-note" role="note"><strong>ตัวอย่างการออกแบบเท่านั้น</strong><span>หน้านี้ใช้ข้อมูลจำลอง ไม่มีรหัสผ่านจริง และยังไม่ได้ปรับใช้กับ Production</span></aside>
+</body>
+</html>
