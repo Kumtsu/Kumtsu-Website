@@ -50,26 +50,28 @@ function renderSelectedBranch() {
   if (!branch) return;
   const brands = state.data.brands.filter((row) => row.branch_id === branch.id);
   const channels = state.data.channels.filter((row) => brands.some((brand) => brand.id === row.brand_id));
+  const foodstoryChannel = channels.find((channel) => /food\s*story/i.test(channel.name));
+  const deliveryChannelCount = channels.filter((channel) => !/food\s*story/i.test(channel.name)).length;
   $('#branchCode').textContent = `BRANCH ${branch.code}`;
   $('#branchName').textContent = branch.name;
   $('#branchAddress').textContent = branch.address || 'ยังไม่มีข้อมูลที่อยู่';
   $('#branchPhone').href = branch.phone ? `tel:${branch.phone}` : '#';
   $('#branchPhone strong').textContent = branch.phone || '—';
   $('#branchMap').href = mapUrl(branch.coordinates);
-  $('#accountSummary').textContent = `${brands.length} แบรนด์ · ${channels.length} ช่องทางขาย`;
-  $('#brandList').innerHTML = brands.map((brand) => {
+  $('#accountSummary').textContent = `${brands.length} แบรนด์ · ${deliveryChannelCount + (foodstoryChannel ? 1 : 0)} ช่องทางขาย`;
+  const brandCards = brands.map((brand) => {
     const brandChannels = state.data.channels.filter((row) => row.brand_id === brand.id);
-    const foodstoryChannels = brandChannels.filter((channel) => /food\s*story/i.test(channel.name));
     const deliveryChannels = brandChannels.filter((channel) => !/food\s*story/i.test(channel.name));
     const deliverySection = deliveryChannels.length
       ? `<div class="channel-list"><p class="subsection-label">DELIVERY CHANNELS</p>${deliveryChannels.map(channelRow).join('')}</div>`
       : '';
-    const foodstorySection = foodstoryChannels.length
-      ? `<section class="foodstory-section"><div class="foodstory-heading"><img class="foodstory-logo" src="./branch-access-assets/apps/w-pos.jpeg" alt="FoodStory"><div><h5>FoodStory</h5><span>POS ACCOUNT</span></div></div>${foodstoryChannels.map(channelRow).join('')}</section>`
-      : '';
-    const emptyState = brandChannels.length ? '' : '<div class="channel-list"><p class="muted">ไม่มีช่องทางขาย</p></div>';
-    return `<article class="brand-card"><div class="brand-head"><div class="brand-identity"><img class="brand-logo" src="${logoFor(brand.name)}" alt=""><div><h4>${escapeHtml(brand.name)}</h4><span class="brand-code">${escapeHtml(brand.code)}</span></div></div></div><div class="credentials">${credentialRow('brand', brand, 'บัญชีหลักของแบรนด์')}</div>${deliverySection}${foodstorySection}${emptyState}</article>`;
+    const emptyState = deliveryChannels.length ? '' : '<div class="channel-list"><p class="muted">ไม่มีช่องทางเดลิเวอรี</p></div>';
+    return `<article class="brand-card"><div class="brand-head"><div class="brand-identity"><img class="brand-logo" src="${logoFor(brand.name)}" alt=""><div><h4>${escapeHtml(brand.name)}</h4><span class="brand-code">${escapeHtml(brand.code)}</span></div></div></div><div class="credentials">${credentialRow('brand', brand, 'บัญชีหลักของแบรนด์')}</div>${deliverySection}${emptyState}</article>`;
   }).join('') || '<div class="state-card">สาขานี้ยังไม่มีข้อมูลแบรนด์</div>';
+  const foodstorySection = foodstoryChannel
+    ? `<section class="branch-foodstory-card"><div class="foodstory-heading"><img class="foodstory-logo" src="./branch-access-assets/apps/w-pos.jpeg" alt="FoodStory"><div><h5>FoodStory</h5><span>POS ACCOUNT · บัญชีประจำสาขา</span></div></div>${channelRow(foodstoryChannel)}</section>`
+    : '';
+  $('#brandList').innerHTML = `${brandCards}${foodstorySection}`;
   $('#branchView').hidden = false;
   $('#editBranchButton').hidden = !state.data.access.canEdit;
   renderBranches();

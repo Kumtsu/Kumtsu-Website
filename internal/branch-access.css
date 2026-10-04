@@ -197,12 +197,13 @@ button, input { font: inherit; }
 .channel-row:last-child { border-bottom: 0; }
 .channel-row h5 { margin: 0; color: #172019; font-size: .84rem; }
 .channel-row p { margin: 2px 0 0; color: var(--muted); font-size: .72rem; }
-.foodstory-section { margin: 0 18px 18px; padding: 15px; border: 1px solid var(--green-line); border-radius: 14px; background: var(--green-soft); }
+.branch-foodstory-card { display: grid; grid-column: 1 / -1; grid-template-columns: minmax(220px, .42fr) minmax(0, 1fr); align-items: center; gap: 24px; padding: 20px; border: 1px solid var(--green-line); border-radius: 18px; background: var(--green-soft); box-shadow: 0 10px 34px rgba(26, 49, 32, .06); }
 .foodstory-heading { display: flex; align-items: center; gap: 11px; margin-bottom: 7px; }
 .foodstory-logo { width: 42px; height: 42px; border: 1px solid #cce2d3; border-radius: 10px; object-fit: contain; background: #fff; }
 .foodstory-heading h5 { margin: 0; color: #075c2b; font-size: .98rem; }
 .foodstory-heading span { display: block; color: #568066; font-size: .65rem; font-weight: 800; letter-spacing: .1em; }
-.foodstory-section .channel-row { border-color: #cfe5d6; }
+.branch-foodstory-card .foodstory-heading { margin: 0; }
+.branch-foodstory-card .channel-row { padding: 0; border: 0; }
 
 .button.primary { border-color: var(--green); background: var(--green); color: #fff; }
 .button.secondary { border-color: #b9c5bc; color: #34453a; }
@@ -237,6 +238,7 @@ button, input { font: inherit; }
   .branch-hero, .section-heading { display: block; }
   .branch-hero .button { margin-top: 18px; }
   .credential-row, .channel-row { grid-template-columns: 1fr; }
+  .branch-foodstory-card { grid-template-columns: 1fr; gap: 12px; }
   .row-actions { justify-content: flex-start; }
   .security-note { flex-direction: column; align-items: flex-start; }
 }
