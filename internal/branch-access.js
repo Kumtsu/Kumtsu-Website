@@ -39,6 +39,12 @@ function credentialRow(kind, row, label) {
   return `<div class="credential-row"><div class="credential-copy"><span>${escapeHtml(label)}</span><strong title="${escapeHtml(row.login_identifier)}">${escapeHtml(row.login_identifier || '—')}</strong><span>รหัสผ่าน: ${password ? escapeHtml(password) : '••••••••'}</span></div><div class="row-actions"><button class="mini-button" data-reveal-kind="${kind}" data-reveal-id="${row.id}" type="button">${password ? 'ซ่อน' : 'ดูรหัส'}</button><button class="mini-button admin-only" data-edit-kind="${kind}" data-edit-id="${row.id}" type="button"${state.data.access.canEdit ? '' : ' hidden'}>แก้ไข</button></div></div>`;
 }
 
+function channelRow(channel) {
+  const key = `channel:${channel.id}`;
+  const password = state.revealed.get(key);
+  return `<div class="channel-row"><div><h5>${escapeHtml(channel.name)}</h5><p>${escapeHtml(channel.login_identifier || '—')}</p>${password ? `<p>รหัสผ่าน: <strong>${escapeHtml(password)}</strong></p>` : ''}</div><div class="row-actions"><button class="mini-button" data-reveal-kind="channel" data-reveal-id="${channel.id}" type="button">${password ? 'ซ่อน' : 'ดูรหัส'}</button><button class="mini-button admin-only" data-edit-kind="channel" data-edit-id="${channel.id}" type="button"${state.data.access.canEdit ? '' : ' hidden'}>แก้ไข</button></div></div>`;
+}
+
 function renderSelectedBranch() {
   const branch = state.data.branches.find((row) => row.id === state.selectedBranchId);
   if (!branch) return;
@@ -53,7 +59,16 @@ function renderSelectedBranch() {
   $('#accountSummary').textContent = `${brands.length} แบรนด์ · ${channels.length} ช่องทางขาย`;
   $('#brandList').innerHTML = brands.map((brand) => {
     const brandChannels = state.data.channels.filter((row) => row.brand_id === brand.id);
-    return `<article class="brand-card"><div class="brand-head"><div class="brand-identity"><img class="brand-logo" src="${logoFor(brand.name)}" alt=""><div><h4>${escapeHtml(brand.name)}</h4><span class="brand-code">${escapeHtml(brand.code)}</span></div></div></div><div class="credentials">${credentialRow('brand', brand, 'บัญชีหลักของแบรนด์')}</div><div class="channel-list">${brandChannels.map((channel) => `<div class="channel-row"><div><h5>${escapeHtml(channel.name)}</h5><p>${escapeHtml(channel.login_identifier || '—')}</p></div><div class="row-actions"><button class="mini-button" data-reveal-kind="channel" data-reveal-id="${channel.id}" type="button">${state.revealed.has(`channel:${channel.id}`) ? 'ซ่อน' : 'ดูรหัส'}</button><button class="mini-button admin-only" data-edit-kind="channel" data-edit-id="${channel.id}" type="button"${state.data.access.canEdit ? '' : ' hidden'}>แก้ไข</button></div>${state.revealed.has(`channel:${channel.id}`) ? `<p>รหัสผ่าน: <strong>${escapeHtml(state.revealed.get(`channel:${channel.id}`))}</strong></p>` : ''}</div>`).join('') || '<p class="muted">ไม่มีช่องทางขาย</p>'}</div></article>`;
+    const foodstoryChannels = brandChannels.filter((channel) => /food\s*story/i.test(channel.name));
+    const deliveryChannels = brandChannels.filter((channel) => !/food\s*story/i.test(channel.name));
+    const deliverySection = deliveryChannels.length
+      ? `<div class="channel-list"><p class="subsection-label">DELIVERY CHANNELS</p>${deliveryChannels.map(channelRow).join('')}</div>`
+      : '';
+    const foodstorySection = foodstoryChannels.length
+      ? `<section class="foodstory-section"><div class="foodstory-heading"><img class="foodstory-logo" src="./branch-access-assets/apps/w-pos.jpeg" alt="FoodStory"><div><h5>FoodStory</h5><span>POS ACCOUNT</span></div></div>${foodstoryChannels.map(channelRow).join('')}</section>`
+      : '';
+    const emptyState = brandChannels.length ? '' : '<div class="channel-list"><p class="muted">ไม่มีช่องทางขาย</p></div>';
+    return `<article class="brand-card"><div class="brand-head"><div class="brand-identity"><img class="brand-logo" src="${logoFor(brand.name)}" alt=""><div><h4>${escapeHtml(brand.name)}</h4><span class="brand-code">${escapeHtml(brand.code)}</span></div></div></div><div class="credentials">${credentialRow('brand', brand, 'บัญชีหลักของแบรนด์')}</div>${deliverySection}${foodstorySection}${emptyState}</article>`;
   }).join('') || '<div class="state-card">สาขานี้ยังไม่มีข้อมูลแบรนด์</div>';
   $('#branchView').hidden = false;
   $('#editBranchButton').hidden = !state.data.access.canEdit;
