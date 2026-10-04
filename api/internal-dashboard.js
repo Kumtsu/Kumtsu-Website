@@ -4,7 +4,7 @@ const systems = [
   { id: '01', title: 'Sale Dashboard', description: 'ระบบวิเคราะห์ยอดขาย', url: 'https://kumtsu-sales-dashboard.vercel.app/', status: 'live' },
   { id: '02', title: 'Time Pause Dashboard', description: 'ระบบตรวจสอบการกดปิดร้าน', url: 'https://kumtsu-offline-july-2026.kumtsu-7034.chatgpt.site/', status: 'live' },
   { id: '03', title: 'Rating & Feedback Dashboard', description: 'ระบบตรวจสอบคะแนนและข้อเสนอแนะ', url: '/internal/rating-feedback', status: 'live' },
-  { id: '04', title: 'Email & Pass Login App Kumtsu', description: 'รวมอีเมลและรหัสเข้าแอปคุ้มสึ', url: 'https://kumtsu-group-profile.kumtsu-7034.chatgpt.site/internal/branch-access', status: 'live' },
+  { id: '04', title: 'Email & Pass Login App Kumtsu', description: 'รวมอีเมลและรหัสเข้าแอปคุ้มสึ', url: '/internal/branch-access', status: 'live' },
   { id: '05', title: 'SOP Detail', description: 'ระบบค้นหาและตรวจสอบมาตรฐานการทำเมนู', url: '/internal/sol-detail', status: 'live' },
 ];
 

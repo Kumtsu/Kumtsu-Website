@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#101210">
+  <title>Kumtsu Branch Access</title>
+  <base href="/internal/">
+  <link rel="stylesheet" href="./branch-access.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./dashboard"><span class="brand-mark">K</span><span>KUMTSU <small>BRANCH ACCESS</small></span></a>
+    <div class="top-actions">
+      <span id="adminBadge" class="admin-badge" hidden>ADMIN · แก้ไขได้</span>
+      <span id="userName" class="user-name">กำลังโหลด…</span>
+      <a class="back-link" href="./dashboard">กลับระบบภายใน</a>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-heading">
+        <p class="eyebrow">BRANCH DIRECTORY</p>
+        <h1>ข้อมูลเข้าสู่ระบบ<br><span>ทุกสาขา</span></h1>
+        <p id="branchCount" class="muted">กำลังโหลดข้อมูล…</p>
+      </div>
+      <label class="search-field">
+        <span>ค้นหาสาขา</span>
+        <input id="branchSearch" type="search" placeholder="ชื่อหรือรหัสสาขา" autocomplete="off">
+      </label>
+      <nav id="branchList" class="branch-list" aria-label="รายชื่อสาขา"></nav>
+    </aside>
+
+    <section class="content">
+      <div id="loadingState" class="state-card">กำลังตรวจสอบสิทธิ์และโหลดข้อมูล…</div>
+      <div id="errorState" class="state-card error" hidden></div>
+      <div id="branchView" hidden>
+        <section class="branch-hero">
+          <div>
+            <p id="branchCode" class="eyebrow"></p>
+            <h2 id="branchName"></h2>
+            <p id="branchAddress" class="branch-address"></p>
+          </div>
+          <button id="editBranchButton" class="button secondary admin-only" type="button" hidden>แก้ไขข้อมูลสาขา</button>
+        </section>
+
+        <div class="branch-meta">
+          <a id="branchPhone" class="meta-card" href="#"><span>โทรศัพท์</span><strong></strong></a>
+          <a id="branchMap" class="meta-card" href="#" target="_blank" rel="noreferrer"><span>แผนที่</span><strong>เปิดพิกัด ↗</strong></a>
+        </div>
+
+        <section class="section-heading">
+          <div><p class="eyebrow">ACCOUNTS</p><h3>แบรนด์และช่องทางขาย</h3></div>
+          <p id="accountSummary" class="muted"></p>
+        </section>
+        <div id="brandList" class="brand-grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <aside class="security-note" role="note"><strong>ข้อมูลภายในบริษัท</strong><span>ห้ามส่งต่ออีเมลหรือรหัสผ่านให้บุคคลภายนอก การแก้ไขทุกครั้งจะถูกบันทึกในระบบ</span></aside>
+
+  <dialog id="editDialog" class="edit-dialog">
+    <form id="editForm" method="dialog">
+      <div class="dialog-head"><div><p class="eyebrow">ADMIN EDIT</p><h2 id="editTitle">แก้ไขข้อมูล</h2></div><button class="icon-button" value="cancel" aria-label="ปิด">×</button></div>
+      <div id="editFields" class="edit-fields"></div>
+      <div id="editError" class="form-error" hidden></div>
+      <div class="dialog-actions"><button class="button secondary" value="cancel">ยกเลิก</button><button id="saveButton" class="button primary" type="submit">บันทึกข้อมูล</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+  <script type="module" src="./branch-access.js"></script>
+</body>
+</html>
