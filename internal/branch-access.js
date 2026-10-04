@@ -96,25 +96,53 @@ const FIELD_LABELS = {
   channel: [['name', 'ชื่อช่องทางขาย'], ['login_identifier', 'อีเมลหรือชื่อผู้ใช้'], ['password', 'รหัสผ่านใหม่ (เว้นว่างหากไม่เปลี่ยน)']],
 };
 
+const CREATE_REQUIRED = {
+  branch: new Set(['code', 'name']),
+  brand: new Set(['name', 'code', 'login_identifier', 'password']),
+};
+
+function editorFields(kind, row = {}, create = false) {
+  return FIELD_LABELS[kind].map(([field, label]) => {
+    const password = field === 'password';
+    const displayLabel = create && password ? 'รหัสผ่าน' : label;
+    const required = create && CREATE_REQUIRED[kind]?.has(field) ? ' required' : '';
+    return `<label>${displayLabel}<input name="${field}" value="${password ? '' : escapeHtml(row[field] || '')}"${password ? ' type="password" autocomplete="new-password"' : ''}${required}></label>`;
+  }).join('');
+}
+
 function openEditor(kind, id) {
   if (!state.data.access.canEdit) return;
   const collection = kind === 'branch' ? state.data.branches : kind === 'brand' ? state.data.brands : state.data.channels;
   const row = collection.find((item) => item.id === id);
   if (!row) return;
-  state.editTarget = { kind, id };
+  state.editTarget = { mode: 'edit', kind, id };
+  $('#dialogMode').textContent = 'ADMIN EDIT';
   $('#editTitle').textContent = kind === 'branch' ? 'แก้ไขข้อมูลสาขา' : kind === 'brand' ? 'แก้ไขบัญชีแบรนด์' : 'แก้ไขช่องทางขาย';
-  $('#editFields').innerHTML = FIELD_LABELS[kind].map(([field, label]) => `<label>${label}<input name="${field}" value="${field === 'password' ? '' : escapeHtml(row[field] || '')}" ${field === 'password' ? 'type="password" autocomplete="new-password"' : ''}></label>`).join('');
+  $('#editFields').innerHTML = editorFields(kind, row);
+  $('#editError').hidden = true;
+  $('#editDialog').showModal();
+}
+
+function openCreator(kind) {
+  if (!state.data.access.canEdit || (kind === 'brand' && !state.selectedBranchId)) return;
+  state.editTarget = { mode: 'create', kind, branchId: kind === 'brand' ? state.selectedBranchId : null };
+  $('#dialogMode').textContent = 'ADMIN CREATE';
+  $('#editTitle').textContent = kind === 'branch' ? 'เพิ่มสาขา' : 'เพิ่มแบรนด์ในสาขานี้';
+  $('#editFields').innerHTML = editorFields(kind, {}, true);
   $('#editError').hidden = true;
   $('#editDialog').showModal();
 }
 
 async function saveEdit(event) {
   event.preventDefault();
-  const { kind, id } = state.editTarget || {};
-  if (!kind || !id) return;
+  const { mode, kind, id, branchId } = state.editTarget || {};
+  if (!kind || (mode !== 'create' && !id)) return;
   const changes = Object.fromEntries(new FormData(event.currentTarget));
   $('#saveButton').disabled = true;
-  const { response, data } = await api('/api/branch-access', { method: 'PATCH', body: JSON.stringify({ entity: kind, id, changes }) });
+  const create = mode === 'create';
+  const values = create && kind === 'brand' ? { ...changes, branch_id: branchId } : changes;
+  const payload = create ? { entity: kind, values } : { entity: kind, id, changes };
+  const { response, data } = await api('/api/branch-access', { method: create ? 'POST' : 'PATCH', body: JSON.stringify(payload) });
   $('#saveButton').disabled = false;
   if (!response.ok) {
     $('#editError').textContent = data.message || 'บันทึกข้อมูลไม่สำเร็จ';
@@ -123,6 +151,7 @@ async function saveEdit(event) {
   }
   $('#editDialog').close();
   showToast(data.message || 'บันทึกข้อมูลแล้ว');
+  if (create && kind === 'branch') state.selectedBranchId = Number(data.id);
   await loadData(true);
 }
 
@@ -133,6 +162,8 @@ async function loadData(keepSelection = false) {
   if (!keepSelection || !data.branches.some((row) => row.id === state.selectedBranchId)) state.selectedBranchId = data.branches[0]?.id || null;
   $('#userName').textContent = data.access.displayName || data.access.email;
   $('#adminBadge').hidden = !data.access.canEdit;
+  $('#addBranchButton').hidden = !data.access.canEdit;
+  $('#addBrandButton').hidden = !data.access.canEdit;
   $('#branchCount').textContent = `${data.branches.length} สาขา · ${data.brands.length} แบรนด์ · ${data.channels.length} ช่องทาง`;
   $('#loadingState').hidden = true;
   renderBranches();
@@ -153,6 +184,9 @@ $('#brandList').addEventListener('click', (event) => {
   if (edit) openEditor(edit.dataset.editKind, Number(edit.dataset.editId));
 });
 $('#editBranchButton').addEventListener('click', () => openEditor('branch', state.selectedBranchId));
+$('#addBranchButton').addEventListener('click', () => openCreator('branch'));
+$('#addBrandButton').addEventListener('click', () => openCreator('brand'));
+document.querySelectorAll('[data-close-dialog]').forEach((button) => button.addEventListener('click', () => $('#editDialog').close()));
 $('#editForm').addEventListener('submit', saveEdit);
 
 loadData().catch((error) => {

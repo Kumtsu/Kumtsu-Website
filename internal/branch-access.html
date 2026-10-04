@@ -25,6 +25,7 @@
         <p class="eyebrow">BRANCH DIRECTORY</p>
         <h1>ข้อมูลเข้าสู่ระบบ<br><span>ทุกสาขา</span></h1>
         <p id="branchCount" class="muted">กำลังโหลดข้อมูล…</p>
+        <button id="addBranchButton" class="button primary add-button admin-only" type="button" hidden>+ เพิ่มสาขา</button>
       </div>
       <label class="search-field">
         <span>ค้นหาสาขา</span>
@@ -53,7 +54,7 @@
 
         <section class="section-heading">
           <div><p class="eyebrow">ACCOUNTS</p><h3>แบรนด์และช่องทางขาย</h3></div>
-          <p id="accountSummary" class="muted"></p>
+          <div class="section-actions"><p id="accountSummary" class="muted"></p><button id="addBrandButton" class="button primary admin-only" type="button" hidden>+ เพิ่มแบรนด์</button></div>
         </section>
         <div id="brandList" class="brand-grid"></div>
       </div>
@@ -64,10 +65,10 @@
 
   <dialog id="editDialog" class="edit-dialog">
     <form id="editForm" method="dialog">
-      <div class="dialog-head"><div><p class="eyebrow">ADMIN EDIT</p><h2 id="editTitle">แก้ไขข้อมูล</h2></div><button class="icon-button" value="cancel" aria-label="ปิด">×</button></div>
+      <div class="dialog-head"><div><p id="dialogMode" class="eyebrow">ADMIN EDIT</p><h2 id="editTitle">แก้ไขข้อมูล</h2></div><button class="icon-button" type="button" data-close-dialog aria-label="ปิด">×</button></div>
       <div id="editFields" class="edit-fields"></div>
       <div id="editError" class="form-error" hidden></div>
-      <div class="dialog-actions"><button class="button secondary" value="cancel">ยกเลิก</button><button id="saveButton" class="button primary" type="submit">บันทึกข้อมูล</button></div>
+      <div class="dialog-actions"><button class="button secondary" type="button" data-close-dialog>ยกเลิก</button><button id="saveButton" class="button primary" type="submit">บันทึกข้อมูล</button></div>
     </form>
   </dialog>
 

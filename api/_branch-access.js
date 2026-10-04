@@ -93,9 +93,28 @@ function cleanChanges(entity, input) {
   return output;
 }
 
+function cleanCreate(entity, input) {
+  if (entity !== 'branch' && entity !== 'brand') return null;
+  const config = TABLES[entity];
+  const output = {};
+  for (const field of config.fields) output[field] = String(input?.[field] || '').trim().slice(0, 500);
+
+  if (!output.name || !output.code) return null;
+  if (entity === 'brand') {
+    const branchId = Number(input?.branch_id);
+    const password = String(input?.password || '');
+    if (!Number.isSafeInteger(branchId) || branchId <= 0 || !output.login_identifier || !password) return null;
+    output.branch_id = branchId;
+    output.password_encrypted = encryptSecret(password);
+  }
+  output.updated_at = new Date().toISOString();
+  return output;
+}
+
 module.exports = {
   ADMIN_EMAIL,
   TABLES,
+  cleanCreate,
   cleanChanges,
   decryptSecret,
   encryptSecret,
