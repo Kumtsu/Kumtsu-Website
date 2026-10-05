@@ -3,7 +3,7 @@ const dashboardData = require('./_rating-feedback-data.json');
 
 const STATUSES = new Set(['none', 'needs_improvement', 'in_progress', 'resolved']);
 const EXTRA_ADMIN_ASSIGNMENTS = [
-  { branch: '*', email: 'pachara.r@kumtsu.com', name: 'พชร รัตนเขมากร', role: 'operations_manager' },
+  { branch: '*', email: 'pachara.r@kumtsu.com', name: 'พัชระ รัตนเขมากร', role: 'operations_manager' },
 ];
 const areaManagers = [...dashboardData.areaManagers, ...EXTRA_ADMIN_ASSIGNMENTS];
 
