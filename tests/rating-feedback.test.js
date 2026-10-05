@@ -3,6 +3,7 @@ const test = require('node:test');
 
 process.env.SUPABASE_URL = 'https://example.supabase.co';
 process.env.SUPABASE_PUBLISHABLE_KEY = 'test-key';
+process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-test-key';
 
 const handler = require('../api/rating-feedback');
 
@@ -29,6 +30,7 @@ test('returns all review records to an active internal user', async (t) => {
     if (url.endsWith('/auth/v1/user')) {
       return new Response(JSON.stringify({ id: 'user-1', email: 'ai.y@kumtsu.com' }), { status: 200 });
     }
+    if (url.includes('/rest/v1/rfd_feedback_workflow')) return new Response('[]', { status: 200 });
     return new Response(JSON.stringify([{
       employee_id: 'KM001',
       first_name: 'อ้าย',
@@ -42,6 +44,7 @@ test('returns all review records to an active internal user', async (t) => {
   await handler(request('Bearer valid-token'), res);
   assert.equal(res.statusCode, 200);
   assert.equal(res.body.records.length, 345);
+  assert.deepEqual(res.body.issues, {});
   assert.equal(res.body.profile.status, 'active');
 });
 
