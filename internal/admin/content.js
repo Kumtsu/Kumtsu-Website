@@ -31,6 +31,11 @@ const defaults = {
   news: { items: [], relatedMode: 'latest', relatedIds: [] },
 };
 
+const previewNewsItems = [
+  { id:'preview-featured', title:'คุ้มสึเดินหน้าขยายสาขา พร้อมเสิร์ฟความคุ้มให้ใกล้คุณยิ่งขึ้น', category:'ข่าวสาร', date:'2026-09-20', status:'published', featured:true, excerpt:'พบกับสาขาใหม่ของคุ้มสึที่มาพร้อมเมนูซิกเนเจอร์ ข้าวหน้าเนื้อพ่นไฟ และโปรโมชั่นพิเศษในช่วงเปิดร้าน', cover:'https://kumtsu-group-profile.kumtsu-7034.chatgpt.site/assets/hero-01.jpg', blocks:[{ type:'text', text:'คุ้มสึเดินหน้าขยายสาขาอย่างต่อเนื่อง เพื่อให้ลูกค้าทั่วประเทศเข้าถึงอาหารญี่ปุ่นคุณภาพดีในราคาที่คุ้มค่าได้ง่ายยิ่งขึ้น' },{ type:'image', image:'https://kumtsu-group-profile.kumtsu-7034.chatgpt.site/assets/hero-05.jpg', alt:'เมนูซิกเนเจอร์ของคุ้มสึ', layout:'full' },{ type:'text', text:'ติดตามรายละเอียดวันเปิดให้บริการและโปรโมชั่นพิเศษได้ทางช่องทางของคุ้มสึ' }] },
+  { id:'preview-regular', title:'เปิดโอกาสร่วมเป็นเจ้าของแฟรนไชส์คุ้มสึ', category:'กิจกรรม', date:'2026-09-12', status:'published', featured:false, excerpt:'เริ่มต้นธุรกิจร้านอาหารกับระบบสนับสนุนครบวงจร สูตรอาหารมาตรฐาน และแผนการตลาดจากทีมคุ้มสึ', cover:'https://kumtsu-group-profile.kumtsu-7034.chatgpt.site/assets/kumtsu-franchise.jpg', blocks:[{ type:'text', text:'คุ้มสึเปิดรับผู้สนใจร่วมเป็นพันธมิตรแฟรนไชส์และ Cloud Kitchen ด้วยรูปแบบการลงทุนที่ยืดหยุ่น' }] },
+];
+
 document.querySelector('#logoutButton').addEventListener('click', () => { clearSession(); location.replace('../login.html'); });
 document.querySelectorAll('.cms-nav').forEach((button) => button.addEventListener('click', () => switchPage(button.dataset.page)));
 document.querySelector('#saveButton').addEventListener('click', saveDraft);
@@ -56,7 +61,7 @@ async function switchPage(next) {
 async function load() {
   editor.innerHTML = '<div class="empty">กำลังโหลดข้อมูล…</div>';
   if (designPreview) {
-    data = page === 'home' ? await bootstrapHome() : clone(defaults.news);
+    data = page === 'home' ? await bootstrapHome() : { ...clone(defaults.news), items:clone(previewNewsItems) };
     updated.textContent = 'โหมดตัวอย่าง — ยังไม่เชื่อมต่อข้อมูลจริง';
     render();
     return;
@@ -120,7 +125,7 @@ function renderNews() {
   const items = data.items.map((item, index) => {
     if (!Array.isArray(item.blocks)) item.blocks = (item.body || []).map((text) => ({ type:'text', text }));
     const blocks = item.blocks.map((block, blockIndex) => `<div class="content-block">${toolbar(`${block.type === 'image' ? 'รูปภาพ' : 'ข้อความ'} ${blockIndex + 1}`, `items.${index}.blocks`, blockIndex)}${block.type === 'image' ? `<div class="field-grid"><div class="field full">${imageField(block.image, `items.${index}.blocks.${blockIndex}.image`, block.alt)}</div><label class="field"><span>คำอธิบายรูป</span><input data-bind="items.${index}.blocks.${blockIndex}.alt" value="${escapeHtml(block.alt)}"></label><label class="field"><span>ตำแหน่งรูป</span><select data-bind="items.${index}.blocks.${blockIndex}.layout"><option value="full" ${block.layout === 'full' ? 'selected' : ''}>เต็มความกว้าง</option><option value="left" ${block.layout === 'left' ? 'selected' : ''}>ชิดซ้าย</option><option value="right" ${block.layout === 'right' ? 'selected' : ''}>ชิดขวา</option></select></label></div>` : `<label class="field full"><span>เนื้อหา</span><textarea data-bind="items.${index}.blocks.${blockIndex}.text">${escapeHtml(block.text)}</textarea></label>`}</div>`).join('');
-    return `<div class="editor-item">${toolbar(`ข่าว ${index + 1}`, 'items', index)}<div class="field-grid"><label class="field"><span>หัวข้อข่าว</span><input data-bind="items.${index}.title" value="${escapeHtml(item.title)}"></label><label class="field"><span>หมวดหมู่</span><input data-bind="items.${index}.category" value="${escapeHtml(item.category)}"></label><label class="field"><span>วันที่</span><input type="date" data-bind="items.${index}.date" value="${escapeHtml(item.date)}"></label><label class="field"><span>สถานะ</span><select data-bind="items.${index}.status"><option value="draft" ${item.status !== 'published' ? 'selected' : ''}>ฉบับร่าง</option><option value="published" ${item.status === 'published' ? 'selected' : ''}>เผยแพร่</option></select></label><label class="field full"><span>ข้อความย่อ</span><textarea data-bind="items.${index}.excerpt">${escapeHtml(item.excerpt)}</textarea></label><div class="field full">${imageField(item.cover, `items.${index}.cover`, item.title)}</div></div><div class="block-heading"><strong>เนื้อหาข่าว</strong><div><button type="button" class="add-button" data-add-block="text" data-item="${index}">+ ข้อความ</button><button type="button" class="add-button" data-add-block="image" data-item="${index}">+ รูปภาพ</button></div></div><div class="block-list">${blocks || empty('เพิ่มข้อความหรือรูปภาพได้ตามต้องการ')}</div></div>`;
+    return `<div class="editor-item">${toolbar(`ข่าว ${index + 1}`, 'items', index)}<div class="field-grid"><label class="field"><span>หัวข้อข่าว</span><input data-bind="items.${index}.title" value="${escapeHtml(item.title)}"></label><label class="field"><span>หมวดหมู่</span><input data-bind="items.${index}.category" value="${escapeHtml(item.category)}"></label><label class="field"><span>วันที่</span><input type="date" data-bind="items.${index}.date" value="${escapeHtml(item.date)}"></label><label class="field"><span>สถานะ</span><select data-bind="items.${index}.status"><option value="draft" ${item.status !== 'published' ? 'selected' : ''}>ฉบับร่าง</option><option value="published" ${item.status === 'published' ? 'selected' : ''}>เผยแพร่</option></select></label><label class="field full"><span>การแสดงผลบนหน้าข่าว</span><select data-featured="${index}"><option value="normal" ${item.featured !== true ? 'selected' : ''}>ข่าวทั่วไป</option><option value="featured" ${item.featured === true ? 'selected' : ''}>ข่าวสำคัญ — แสดงเนื้อหาเต็มด้านบน</option></select></label><label class="field full"><span>ข้อความย่อ</span><textarea data-bind="items.${index}.excerpt">${escapeHtml(item.excerpt)}</textarea></label><div class="field full">${imageField(item.cover, `items.${index}.cover`, item.title)}</div></div><div class="block-heading"><strong>เนื้อหาข่าว</strong><div><button type="button" class="add-button" data-add-block="text" data-item="${index}">+ ข้อความ</button><button type="button" class="add-button" data-add-block="image" data-item="${index}">+ รูปภาพ</button></div></div><div class="block-list">${blocks || empty('เพิ่มข้อความหรือรูปภาพได้ตามต้องการ')}</div></div>`;
   }).join('');
   editor.innerHTML = [section('items', 'รายการข่าวสาร & กิจกรรม', 'เพิ่มข่าว', `<div class="item-list">${items || empty('ยังไม่มีข่าว')}</div>`), section('related', 'ข่าวสารอื่น ๆ', '', `<div class="field-grid"><label class="field"><span>วิธีเลือกข่าวแนะนำ</span><select data-bind="relatedMode"><option value="latest" ${data.relatedMode !== 'manual' ? 'selected' : ''}>ข่าวล่าสุดอัตโนมัติ</option><option value="manual" ${data.relatedMode === 'manual' ? 'selected' : ''}>เลือกเอง</option></select></label><label class="field"><span>รหัสข่าวที่เลือก (คั่นด้วยเครื่องหมายจุลภาค)</span><input data-bind-csv="relatedIds" value="${escapeHtml((data.relatedIds || []).join(', '))}"></label></div>`)].join('');
 }
@@ -137,6 +142,13 @@ function syncInputs() {
 
 editor.addEventListener('input', (event) => { const input = event.target; if (input.dataset.bind) setPath(input.dataset.bind, input.value); if (input.dataset.bindLines) setPath(input.dataset.bindLines, lines(input.value)); if (input.dataset.bindCsv) setPath(input.dataset.bindCsv, input.value.split(',').map((item) => item.trim()).filter(Boolean)); if (input.classList.contains('image-url')) input.closest('.image-field').querySelector('img').src = input.value || '/internal/profile-placeholder.svg'; });
 editor.addEventListener('change', async (event) => {
+  const featured = event.target.closest('[data-featured]');
+  if (featured) {
+    syncInputs();
+    data.items.forEach((item, index) => { item.featured = featured.value === 'featured' && index === Number(featured.dataset.featured); });
+    render();
+    return;
+  }
   const input = event.target.closest('[data-upload]'); if (!input?.files?.[0]) return;
   const file = input.files[0];
   if (!['image/jpeg','image/png','image/webp','image/gif'].includes(file.type) || file.size > 10 * 1024 * 1024) return toast('รูปต้องเป็น JPG, PNG, WEBP หรือ GIF และไม่เกิน 10 MB', true);
