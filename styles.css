@@ -213,6 +213,16 @@
     .franchise-list { list-style: none; margin: 0 0 28px; padding: 0; border-top: 1px solid #333333; }
     .franchise-list li { position: relative; padding: 14px 0 14px 28px; border-bottom: 1px solid #333333; font-size: 1.02rem; line-height: 1.65; color: #F5F5F5; }
     .franchise-list li::before { content: "✓"; position: absolute; left: 0; top: 14px; color: var(--green); font-weight: 900; }
+    .cloud-kitchen-clients { margin-top: clamp(52px, 7vw, 88px); }
+    .cloud-kitchen-clients-head { margin-bottom: 26px; }
+    .cloud-kitchen-clients-head .eyebrow { color: var(--green); }
+    .cloud-kitchen-clients-head h3 { margin: 12px 0 0; color: #fff; font-size: clamp(1.55rem, 3vw, 2.5rem); line-height: 1.25; }
+    .client-logo-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+    .client-logo-card { min-width: 0; overflow: hidden; border: 1px solid #333; border-radius: 10px; background: #1e1e1e; }
+    .client-logo-art { aspect-ratio: 1; display: grid; place-items: center; padding: 10px; overflow: hidden; background: #fff; }
+    .client-logo-art img { width: 100%; height: 100%; object-fit: contain; transition: transform .35s ease; }
+    .client-logo-card:hover .client-logo-art img { transform: scale(1.035); }
+    .client-logo-card strong { min-height: 62px; padding: 12px 10px; display: grid; place-items: center; color: #f5f5f5; font-size: .86rem; line-height: 1.4; text-align: center; }
 
     .values { background: #121212; color: var(--paper); overflow: hidden; }
     .reviews-head { display: flex; align-items: end; justify-content: space-between; gap: 32px; margin-bottom: 42px; }
@@ -291,6 +301,7 @@
       .story-image { min-height: 460px; }
       .franchise-layout { grid-template-columns: 1fr; }
       .franchise-image { min-height: auto; aspect-ratio: 1; }
+      .client-logo-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
     @media (max-width: 620px) {
       .brandmark { gap: 8px; font-size: .88rem; }
@@ -311,6 +322,8 @@
       .story-copy h2 { margin-bottom: 28px; }
       .story-image { min-height: 330px; }
       .franchise-copy { padding: 34px 24px; }
+      .client-logo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      .client-logo-card strong { min-height: 58px; padding: 10px 8px; font-size: .8rem; }
       .brand-grid { grid-template-columns: repeat(5, minmax(138px, 1fr)); gap: 10px; }
       .brand-card { min-width: 138px; }
       .product-order-cta { align-items: stretch; flex-direction: column; }

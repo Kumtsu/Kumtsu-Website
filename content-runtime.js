@@ -56,4 +56,12 @@
     if (image && item.image) { image.src = safeUrl(item.image); image.alt = item.imageAlt || ''; }
     if (copy && (item.heading || item.paragraphs?.length || item.highlights?.length)) copy.innerHTML = `${item.heading ? `<h3>${esc(item.heading)}</h3>` : ''}${(item.paragraphs || []).map((text) => `<p>${esc(text)}</p>`).join('')}${item.highlights?.length ? `<ul class="franchise-list">${item.highlights.map((text) => `<li>${esc(text)}</li>`).join('')}</ul>` : ''}`;
   }
+
+  if (Array.isArray(content.cloudKitchenClients)) {
+    const grid = document.querySelector('#cloud-kitchen-clients .client-logo-grid');
+    if (grid) {
+      grid.setAttribute('aria-label', `โลโก้ลูกค้า Cloud Kitchen ${content.cloudKitchenClients.length} แบรนด์`);
+      grid.innerHTML = content.cloudKitchenClients.map((item) => `<article class="client-logo-card"><div class="client-logo-art"><img src="${esc(safeUrl(item.logo))}" alt="${esc(item.alt || item.name)}" loading="lazy"></div><strong>${esc(item.name)}</strong></article>`).join('');
+    }
+  }
 })();
