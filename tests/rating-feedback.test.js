@@ -79,4 +79,6 @@ test('allows authorized users to update status directly in Action Required', () 
   assert.match(dashboard, /aria-label="ปรับสถานะ Action Required"/);
   assert.match(dashboard, /allowed\?`<select[^`]+setStatus\('\$\{r\.id\}'/);
   assert.match(dashboard, /:'<span class="readonly">ดูได้อย่างเดียว<\/span>'/);
+  assert.match(dashboard, /function ratingPalette\(rating\)/);
+  assert.match(dashboard, /class="actionrow" style="--review-bg:\$\{palette\[0\]\};--review-accent:\$\{palette\[1\]\};--review-border:\$\{palette\[2\]\}"/);
 });
