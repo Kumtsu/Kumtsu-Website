@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Merge a Wongnai/FoodStory customer-review CSV into dashboard JSON."""
 
+import argparse
 import csv
 import hashlib
 import json
-import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -59,19 +59,32 @@ def fingerprint(record):
     return "\x1f".join(fields)
 
 
-def main(csv_path):
+def main(csv_paths, start_date=None, end_date=None, region="weekly"):
     data = json.loads(DATA_PATH.read_text(encoding="utf-8"))
     known_stores = {record["storeId"]: record["branch"] for record in data["records"]}
     existing = {fingerprint(record) for record in data["records"]}
     master_branches = set(data["masterBranches"])
     imported = []
     skipped = 0
+    skipped_unknown = 0
+    skipped_outside_range = 0
 
-    with Path(csv_path).open(encoding="utf-8-sig", newline="") as source:
-        for row in csv.DictReader(source):
+    for csv_path in csv_paths:
+        with Path(csv_path).open(encoding="utf-8-sig", newline="") as source:
+            rows = list(csv.DictReader(source))
+        for row in rows:
             store_id = row["รหัสร้านค้า"].strip()
             store_name = row["ร้าน"].strip()
             date = normalized_date(row["วันที่"])
+            day = date[:10]
+            if (start_date and day < start_date) or (end_date and day > end_date):
+                skipped_outside_range += 1
+                continue
+            # Only import stores already represented in the dashboard. This prevents
+            # newly opened, unrelated, or closed-down branches from entering the data.
+            if store_id not in known_stores:
+                skipped_unknown += 1
+                continue
             branch = branch_for(store_id, store_name, known_stores)
             if branch not in master_branches:
                 raise ValueError(f"สาขาไม่อยู่ใน masterBranches: {branch} ({store_name})")
@@ -88,7 +101,7 @@ def main(csv_path):
                 "customer": row["ลูกค้า"].strip(),
                 "visibility": row["ประเภท"].strip(),
                 "date": date,
-                "region": "weekly_2026_10_01",
+                "region": region,
             }
             key = fingerprint(record)
             if key in existing:
@@ -107,10 +120,18 @@ def main(csv_path):
         json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\n",
         encoding="utf-8",
     )
-    print(f"imported={len(imported)} skipped={skipped} total={len(data['records'])}")
+    print(
+        f"imported={len(imported)} skipped_duplicate={skipped} "
+        f"skipped_unknown_store={skipped_unknown} "
+        f"skipped_outside_range={skipped_outside_range} total={len(data['records'])}"
+    )
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        raise SystemExit("usage: import-rating-feedback.py <reviews.csv>")
-    main(sys.argv[1])
+    parser = argparse.ArgumentParser()
+    parser.add_argument("csv", nargs="+")
+    parser.add_argument("--start")
+    parser.add_argument("--end")
+    parser.add_argument("--region", default="weekly")
+    args = parser.parse_args()
+    main(args.csv, args.start, args.end, args.region)
