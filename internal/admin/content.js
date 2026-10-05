@@ -13,8 +13,21 @@ const updated = document.querySelector('#lastUpdated');
 let page = 'home';
 let data = {};
 
+const cloudKitchenClients = [
+  { name:'Kinza Gyoza คินซ่าเกี๊ยวซ่า', logo:'/assets/cloud-kitchen-clients/kinza-gyoza.jpg', alt:'โลโก้ Kinza Gyoza คินซ่าเกี๊ยวซ่า' },
+  { name:'Jungle Juice น้ำผลไม้ปั่น', logo:'/assets/cloud-kitchen-clients/jungle-juice.jpg', alt:'โลโก้ Jungle Juice น้ำผลไม้ปั่น' },
+  { name:'ข้าวหมกไก่ คุณนายเรณู', logo:'/assets/cloud-kitchen-clients/khun-nai-renu.jpg', alt:'โลโก้ข้าวหมกไก่ คุณนายเรณู' },
+  { name:'หม้อแม่จูน', logo:'/assets/cloud-kitchen-clients/mor-mae-june.jpg', alt:'โลโก้หม้อแม่จูน' },
+  { name:"Nood's Park Noodles", logo:'/assets/cloud-kitchen-clients/noods-park-noodles.jpg', alt:"โลโก้ Nood's Park Noodles" },
+  { name:'เต้าหู้เฮียแว่น', logo:'/assets/cloud-kitchen-clients/taohu-hia-waen.jpg', alt:'โลโก้เต้าหู้เฮียแว่น' },
+  { name:"Poppy's Cookies", logo:'/assets/cloud-kitchen-clients/poppys-cookies.jpg', alt:"โลโก้ Poppy's Cookies" },
+  { name:'Hoji On โฮจิออน', logo:'/assets/cloud-kitchen-clients/hoji-on.png', alt:'Hoji On โฮจิออน' },
+  { name:'Leela on the go (หมี่ไก่ฉีก)', logo:'/assets/cloud-kitchen-clients/leela-on-the-go.jpg', alt:'โลโก้ Leela on the go หมี่ไก่ฉีก' },
+  { name:'ม่ากรอบ', logo:'/assets/cloud-kitchen-clients/ma-krob.jpg', alt:'โลโก้ม่ากรอบ' },
+];
+
 const defaults = {
-  home: { heroSlides: [], about: { lead: '', paragraphs: [] }, stories: [], brands: [], franchise: { eyebrow: 'Business Opportunity', title: 'Franchise & Cloud Kitchen', image: '', imageAlt: '', heading: '', paragraphs: [], highlights: [] } },
+  home: { heroSlides: [], about: { lead: '', paragraphs: [] }, stories: [], brands: [], franchise: { eyebrow: 'Business Opportunity', title: 'Franchise & Cloud Kitchen', image: '', imageAlt: '', heading: '', paragraphs: [], highlights: [] }, cloudKitchenClients },
   news: { items: [], relatedMode: 'latest', relatedIds: [] },
 };
 
@@ -72,6 +85,7 @@ async function bootstrapHome() {
     current.brands = [...doc.querySelectorAll('#brands .brand-card img')].map((img) => ({ name:img.alt.replace(/^โลโก้/, '').trim(), logo:img.src, alt:img.alt }));
     const franchise = doc.querySelector('#franchise');
     current.franchise = { eyebrow:franchise?.querySelector('.franchise-head .eyebrow')?.textContent.trim() || '', title:franchise?.querySelector('.franchise-head h2')?.textContent.trim() || '', image:franchise?.querySelector('.franchise-image img')?.src || '', imageAlt:franchise?.querySelector('.franchise-image img')?.alt || '', heading:franchise?.querySelector('.franchise-copy h3')?.textContent.trim() || '', paragraphs:[...franchise.querySelectorAll('.franchise-copy p')].map((node) => node.textContent.trim()), highlights:[...franchise.querySelectorAll('.franchise-list li')].map((node) => node.textContent.trim()) };
+    current.cloudKitchenClients = [...doc.querySelectorAll('#cloud-kitchen-clients .client-logo-card')].map((card) => ({ name:card.querySelector('strong')?.textContent.trim() || '', logo:card.querySelector('img')?.src || '', alt:card.querySelector('img')?.alt || '' }));
     return current;
   } catch (_) { return clone(defaults.home); }
 }
@@ -91,12 +105,14 @@ function renderHome() {
   const slides = data.heroSlides.map((item, index) => `<div class="editor-item">${toolbar(`ภาพสไลด์ ${index + 1}`, 'heroSlides', index)}${imageField(item.image, `heroSlides.${index}.image`, item.alt)}<label class="field full"><span>คำอธิบายรูป</span><input data-bind="heroSlides.${index}.alt" value="${escapeHtml(item.alt)}"></label></div>`).join('');
   const stories = data.stories.map((item, index) => `<div class="editor-item">${toolbar(`บล็อกเรื่องราว ${index + 1}`, 'stories', index)}<div class="field-grid"><label class="field"><span>หัวข้อภาษาอังกฤษ</span><input data-bind="stories.${index}.eyebrow" value="${escapeHtml(item.eyebrow)}"></label><label class="field"><span>หัวข้อหลัก</span><input data-bind="stories.${index}.title" value="${escapeHtml(item.title)}"></label><label class="field full"><span>เนื้อหา (ขึ้นบรรทัดใหม่เพื่อสร้างย่อหน้า)</span><textarea data-bind-lines="stories.${index}.paragraphs">${escapeHtml((item.paragraphs || []).join('\n\n'))}</textarea></label><label class="field"><span>ตำแหน่งรูป</span><select data-bind="stories.${index}.imageSide"><option value="right" ${item.imageSide !== 'left' ? 'selected' : ''}>ด้านขวา</option><option value="left" ${item.imageSide === 'left' ? 'selected' : ''}>ด้านซ้าย</option></select></label><label class="field"><span>การแสดงรูป</span><select data-bind="stories.${index}.imageFit"><option value="cover" ${item.imageFit !== 'contain' ? 'selected' : ''}>เต็มกรอบ</option><option value="contain" ${item.imageFit === 'contain' ? 'selected' : ''}>เห็นรูปเต็ม</option></select></label><div class="field full">${imageField(item.image, `stories.${index}.image`, item.imageAlt)}</div><label class="field full"><span>คำอธิบายรูป</span><input data-bind="stories.${index}.imageAlt" value="${escapeHtml(item.imageAlt)}"></label></div></div>`).join('');
   const brands = data.brands.map((item, index) => `<div class="editor-item">${toolbar(`แบรนด์ ${index + 1}`, 'brands', index)}<div class="field-grid"><label class="field"><span>ชื่อแบรนด์</span><input data-bind="brands.${index}.name" value="${escapeHtml(item.name)}"></label><label class="field"><span>คำอธิบายโลโก้</span><input data-bind="brands.${index}.alt" value="${escapeHtml(item.alt)}"></label><div class="field full">${imageField(item.logo, `brands.${index}.logo`, item.alt)}</div></div></div>`).join('');
+  const clients = data.cloudKitchenClients.map((item, index) => `<div class="editor-item">${toolbar(`ลูกค้า Cloud Kitchen ${index + 1}`, 'cloudKitchenClients', index)}<div class="field-grid"><label class="field"><span>ชื่อแบรนด์</span><input data-bind="cloudKitchenClients.${index}.name" value="${escapeHtml(item.name)}"></label><label class="field"><span>คำอธิบายรูป</span><input data-bind="cloudKitchenClients.${index}.alt" value="${escapeHtml(item.alt)}"></label><div class="field full">${imageField(item.logo, `cloudKitchenClients.${index}.logo`, item.alt)}</div></div></div>`).join('');
   editor.innerHTML = [
     section('heroSlides', 'รูปสไลด์ด้านบน', 'เพิ่มรูปสไลด์', `<div class="item-list">${slides || empty('ยังไม่มีรูปสไลด์')}</div>`),
     section('about', 'About Kumtsu', '', `<div class="field-grid"><label class="field full"><span>ข้อความเกริ่นนำ</span><textarea data-bind="about.lead">${escapeHtml(data.about.lead)}</textarea></label><label class="field full"><span>รายละเอียด (ขึ้นบรรทัดใหม่เพื่อสร้างย่อหน้า)</span><textarea data-bind-lines="about.paragraphs">${escapeHtml((data.about.paragraphs || []).join('\n\n'))}</textarea></label></div>`),
     section('stories', 'Our Story', 'เพิ่มบล็อกเรื่องราว', `<div class="item-list">${stories || empty('ยังไม่มีบล็อกเรื่องราว')}</div>`),
     section('brands', 'แบรนด์ในเครือ', 'เพิ่มแบรนด์', `<div class="item-list">${brands || empty('ยังไม่มีแบรนด์')}</div>`),
     section('franchise', 'Franchise & Cloud Kitchen', '', `<div class="field-grid"><label class="field"><span>หัวข้อภาษาอังกฤษ</span><input data-bind="franchise.eyebrow" value="${escapeHtml(data.franchise.eyebrow)}"></label><label class="field"><span>หัวข้อส่วน</span><input data-bind="franchise.title" value="${escapeHtml(data.franchise.title)}"></label><label class="field full"><span>หัวข้อเนื้อหา</span><input data-bind="franchise.heading" value="${escapeHtml(data.franchise.heading)}"></label><label class="field full"><span>เนื้อหา (ขึ้นบรรทัดใหม่เพื่อสร้างย่อหน้า)</span><textarea data-bind-lines="franchise.paragraphs">${escapeHtml((data.franchise.paragraphs || []).join('\n\n'))}</textarea></label><label class="field full"><span>จุดเด่น (หนึ่งรายการต่อบรรทัด)</span><textarea data-bind-lines="franchise.highlights">${escapeHtml((data.franchise.highlights || []).join('\n'))}</textarea></label><div class="field full">${imageField(data.franchise.image, 'franchise.image', data.franchise.imageAlt)}</div><label class="field full"><span>คำอธิบายรูป</span><input data-bind="franchise.imageAlt" value="${escapeHtml(data.franchise.imageAlt)}"></label></div>`),
+    section('cloudKitchenClients', 'ลูกค้า Cloud Kitchen ของเรา', 'เพิ่มแบรนด์ลูกค้า', `<div class="item-list">${clients || empty('ยังไม่มีแบรนด์ลูกค้า Cloud Kitchen')}</div>`),
   ].join('');
 }
 
@@ -133,7 +149,7 @@ editor.addEventListener('change', async (event) => {
   } catch (error) { toast(error.message, true); } finally { input.disabled = false; }
 });
 editor.addEventListener('click', (event) => {
-  const add = event.target.closest('[data-add]'); if (add) { syncInputs(); const key = add.dataset.add; const fresh = { heroSlides:{ image:'',alt:'' }, stories:{ eyebrow:'Our Story',title:'',paragraphs:[],image:'',imageAlt:'',imageSide:'right',imageFit:'cover' }, brands:{ name:'',logo:'',alt:'' }, items:{ id:`news-${Date.now()}`,title:'',category:'ข่าวสาร',date:new Date().toISOString().slice(0,10),status:'draft',excerpt:'',cover:'',body:[] } }[key]; data[key].push(fresh); return render(); }
+  const add = event.target.closest('[data-add]'); if (add) { syncInputs(); const key = add.dataset.add; const fresh = { heroSlides:{ image:'',alt:'' }, stories:{ eyebrow:'Our Story',title:'',paragraphs:[],image:'',imageAlt:'',imageSide:'right',imageFit:'cover' }, brands:{ name:'',logo:'',alt:'' }, cloudKitchenClients:{ name:'',logo:'',alt:'' }, items:{ id:`news-${Date.now()}`,title:'',category:'ข่าวสาร',date:new Date().toISOString().slice(0,10),status:'draft',excerpt:'',cover:'',body:[] } }[key]; data[key].push(fresh); return render(); }
   const remove = event.target.closest('[data-remove]'); if (remove) { syncInputs(); getPath(remove.dataset.remove).splice(Number(remove.dataset.index),1); return render(); }
   const block = event.target.closest('[data-add-block]'); if (block) { syncInputs(); const list = data.items[Number(block.dataset.item)].blocks ||= []; list.push(block.dataset.addBlock === 'image' ? { type:'image',image:'',alt:'',layout:'full' } : { type:'text',text:'' }); return render(); }
   const move = event.target.closest('[data-move]'); if (move) { syncInputs(); const list = getPath(move.dataset.section); const from = Number(move.dataset.index); const to = move.dataset.move === 'up' ? from - 1 : from + 1; if (to >= 0 && to < list.length) [list[from],list[to]] = [list[to],list[from]]; return render(); }
