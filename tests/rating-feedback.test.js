@@ -1,5 +1,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
+const fs = require('node:fs');
+const path = require('node:path');
 
 process.env.SUPABASE_URL = 'https://example.supabase.co';
 process.env.SUPABASE_PUBLISHABLE_KEY = 'test-key';
@@ -70,4 +72,11 @@ test('rejects an internal profile that is not active', async (t) => {
   const res = response();
   await handler(request('Bearer valid-token'), res);
   assert.equal(res.statusCode, 403);
+});
+
+test('allows authorized users to update status directly in Action Required', () => {
+  const dashboard = fs.readFileSync(path.join(__dirname, '..', 'internal', 'rating-feedback.html'), 'utf8');
+  assert.match(dashboard, /aria-label="ปรับสถานะ Action Required"/);
+  assert.match(dashboard, /allowed\?`<select[^`]+setStatus\('\$\{r\.id\}'/);
+  assert.match(dashboard, /:'<span class="readonly">ดูได้อย่างเดียว<\/span>'/);
 });
