@@ -82,3 +82,10 @@ test('allows authorized users to update status directly in Action Required', () 
   assert.match(dashboard, /function ratingPalette\(rating\)/);
   assert.match(dashboard, /class="actionrow" style="--review-bg:\$\{palette\[0\]\};--review-accent:\$\{palette\[1\]\};--review-border:\$\{palette\[2\]\}"/);
 });
+
+test('uses a charcoal page background while keeping content cards light', () => {
+  const dashboard = fs.readFileSync(path.join(__dirname, '..', 'internal', 'rating-feedback.html'), 'utf8');
+  assert.match(dashboard, /--bg:#24282F/);
+  assert.match(dashboard, /--card:#FFFFFF/);
+  assert.match(dashboard, /\.hero>div:first-child h1\{color:#F8FAFC\}/);
+});
