@@ -45,6 +45,7 @@ test('returns all review records to an active internal user', async (t) => {
   assert.equal(res.statusCode, 200);
   assert.equal(res.body.records.length, 345);
   assert.deepEqual(res.body.issues, {});
+  assert.ok(res.body.areaManagers.some((entry) => entry.email === 'pachara.r@kumtsu.com' && entry.branch === '*'));
   assert.equal(res.body.profile.status, 'active');
 });
 

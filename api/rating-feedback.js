@@ -2,10 +2,14 @@ const { currentUser, readJson, send, serviceSupabase, supabase } = require('./_i
 const dashboardData = require('./_rating-feedback-data.json');
 
 const STATUSES = new Set(['none', 'needs_improvement', 'in_progress', 'resolved']);
+const EXTRA_ADMIN_ASSIGNMENTS = [
+  { branch: '*', email: 'pachara.r@kumtsu.com', name: 'พชร รัตนเขมากร', role: 'operations_manager' },
+];
+const areaManagers = [...dashboardData.areaManagers, ...EXTRA_ADMIN_ASSIGNMENTS];
 
 function assignmentsFor(email) {
   const normalized = String(email || '').trim().toLowerCase();
-  return dashboardData.areaManagers.filter((entry) => entry.email.toLowerCase() === normalized);
+  return areaManagers.filter((entry) => entry.email.toLowerCase() === normalized);
 }
 
 function canEdit(email, branch) {
@@ -46,7 +50,7 @@ module.exports = async function handler(req, res) {
     if (!profile || profile.status !== 'active') return send(res, 403, { message: 'บัญชีนี้ยังไม่ได้รับอนุมัติให้ใช้งาน' });
 
     if (req.method === 'GET') {
-      return send(res, 200, { user: { id: auth.user.id, email: auth.user.email }, profile, issues: await loadIssues(), ...dashboardData });
+      return send(res, 200, { user: { id: auth.user.id, email: auth.user.email }, profile, issues: await loadIssues(), ...dashboardData, areaManagers });
     }
 
     const body = await readJson(req);
