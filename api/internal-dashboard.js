@@ -6,6 +6,8 @@ const systems = [
   { id: '03', title: 'Rating & Feedback Dashboard', description: 'ระบบตรวจสอบคะแนนและข้อเสนอแนะ', url: '/internal/rating-feedback', status: 'live' },
   { id: '04', title: 'Email & Pass Login App Kumtsu', description: 'รวมอีเมลและรหัสเข้าแอปคุ้มสึ', url: '/internal/branch-access', status: 'live' },
   { id: '05', title: 'SOP Detail', description: 'ระบบค้นหาและตรวจสอบมาตรฐานการทำเมนู', url: '/internal/sol-detail', status: 'live' },
+  { id: '06', title: 'Kumtsu Maintenance', description: 'ระบบจัดการงานช่างและประวัติการซ่อมสาขา', url: '/internal/maintenance', status: 'live' },
+  { id: '07', title: 'Kumtsu IT Service Desk', description: 'ระบบแจ้งปัญหา ติดตามงาน และจัดการสต๊อกอุปกรณ์ไอที', url: '/internal/it-service', status: 'live' },
 ];
 
 module.exports = async function handler(req, res) {

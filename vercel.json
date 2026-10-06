@@ -16,6 +16,8 @@
     { "source": "/internal/rating-feedback", "destination": "/internal/rating-feedback.html" },
     { "source": "/internal/branch-access", "destination": "/internal/branch-access.html" },
     { "source": "/internal/sol-detail", "destination": "/internal/sol-detail.html" },
+    { "source": "/internal/maintenance", "destination": "/internal/maintenance.html" },
+    { "source": "/internal/it-service", "destination": "/internal/it-service.html" },
     { "source": "/internal/admin", "destination": "/internal/admin/index.html" },
     { "source": "/internal/admin/", "destination": "/internal/admin/index.html" },
     { "source": "/internal/admin/content", "destination": "/internal/admin/content.html" }

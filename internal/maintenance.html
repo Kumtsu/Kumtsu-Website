@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Kumtsu Maintenance | Kumtsu Internal</title>
+  <base href="/internal/">
+  <link rel="stylesheet" href="./maintenance.css">
+  <style>.job-list-panel{margin-top:20px;border-top:1px solid #e1e4e8;padding-top:16px}.job-list-panel h3{margin:0 0 10px}.job-list{display:grid;gap:8px}.job-list-item{display:flex;justify-content:space-between;align-items:center;gap:16px;width:100%;text-align:left}.job-list-item span{display:grid;gap:4px}.job-list-item small{font-weight:400;opacity:.8}.job-list-item:focus-visible,.stat:focus-visible,.job:focus-visible{outline:3px solid #2f78a1;outline-offset:2px}.empty-state{margin:0;padding:18px;text-align:center;border:1px dashed #cbd2d7;border-radius:10px;color:#687078;background:#f8f9fa}@media(max-width:600px){.job-list-item{align-items:flex-start;flex-direction:column}}</style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="top">
+      <div class="brand"><h1>🔧 Kumtsu Maintenance</h1><p>ระบบจัดการงานช่างและประวัติการซ่อมสาขา</p></div>
+      <div class="account"><strong id="viewerName">กำลังโหลด…</strong><span id="viewerRole"></span><div><a href="./dashboard.html">← ระบบงานภายในองค์กร</a><button id="logout" type="button">ออกจากระบบ</button></div></div>
+    </header>
+    <section class="stats" aria-label="สรุปสถานะงาน">
+      <button class="stat all" data-status="all">งานทั้งหมดเดือนนี้<b id="totalStat">0</b></button>
+      <button class="stat waiting" data-status="waiting">รอดำเนินการ<b id="waitingStat">0</b></button>
+      <button class="stat progress" data-status="progress">กำลังดำเนินการ<b id="progressStat">0</b></button>
+      <button class="stat overdue" data-status="overdue">เกินกำหนด<b id="overdueStat">0</b></button>
+      <button class="stat approval" data-status="approval">รออนุมัติปิดงาน<b id="approvalStat">0</b></button>
+      <button class="stat completed" data-status="completed">ปิดงานแล้ว<b id="completedStat">0</b></button>
+      <button class="stat cancelled" data-status="cancelled">ยกเลิกแล้ว<b id="cancelledStat">0</b></button>
+    </section>
+    <section class="panel">
+      <div class="toolbar">
+        <input id="search" placeholder="ค้นหางาน / สาขา..." aria-label="ค้นหางานหรือสาขา">
+        <select id="branchFilter" aria-label="กรองตามสาขา"><option value="all">ทุกสาขา</option></select>
+        <select id="technicianFilter" aria-label="กรองตามช่าง"><option value="all">ช่างทุกคน</option><option>นอส</option><option>เอฟ</option><option>ขวัญ</option></select>
+        <select id="statusFilter" aria-label="กรองตามสถานะ"><option value="all">สถานะที่กำลังใช้งาน</option><option value="waiting">รอดำเนินการ</option><option value="progress">กำลังดำเนินการ</option><option value="overdue">เกินกำหนด</option><option value="approval">รออนุมัติปิดงาน</option><option value="completed">ปิดงานแล้ว</option><option value="cancelled">ยกเลิกแล้ว</option></select>
+        <button class="primary" id="openJob" type="button" hidden>+ เปิดงานใหม่</button>
+      </div>
+      <div class="monthbar"><button id="previousMonth" type="button">‹ เดือนก่อน</button><h2 id="monthTitle"></h2><button id="nextMonth" type="button">เดือนถัดไป ›</button></div>
+      <div class="calendar" id="calendar"></div>
+      <div class="legend"><span><i class="dot waiting-dot"></i>รอดำเนินการ</span><span><i class="dot progress-dot"></i>กำลังดำเนินการ</span><span><i class="dot overdue-dot"></i>เกินกำหนด</span><span><i class="dot approval-dot"></i>รออนุมัติปิดงาน</span></div>
+      <section class="job-list-panel" aria-labelledby="jobListTitle"><h3 id="jobListTitle">รายการงานเดือนนี้</h3><div id="jobList" class="job-list" aria-live="polite"></div></section>
+    </section>
+  </main>
+
+  <div class="modal" id="jobModal" role="dialog" aria-modal="true" aria-labelledby="jobModalTitle">
+    <form class="box" id="jobForm"><h2 id="jobModalTitle">เปิดงานใหม่</h2><div class="grid">
+      <label class="field">สาขา<input id="branch" list="branchOptions" autocomplete="off" placeholder="พิมพ์เพื่อค้นหาสาขา" aria-describedby="branchHelp" required><small id="branchHelp">พิมพ์ชื่อแล้วเลือกสาขาจากรายการ หรือเลือก “สาขาอื่นๆ”</small><datalist id="branchOptions"></datalist></label>
+      <label class="field" id="customBranchField" hidden>ชื่อสาขา / สถานที่อื่น<input id="customBranch" maxlength="120" autocomplete="off" placeholder="ระบุชื่อสาขาหรือสถานที่จริง"></label>
+      <label class="field">ประเภทงาน<select id="jobType" required><option>ระบบไฟฟ้า</option><option>ระบบประปา</option><option>งานเปิดสาขาใหม่</option><option>งานย้ายสาขา</option><option>งานปิดสาขา</option><option>งาน Event</option><option>ซ่อมอุปกรณ์ไฟฟ้า</option><option>งานอื่น ๆ</option></select></label>
+      <label class="field">วันที่นัดหมาย<input id="scheduledDate" type="date" required></label>
+      <label class="field">เวลานัดหมาย<input id="scheduledTime" type="time" required></label>
+      <fieldset class="field technician-field"><legend>ช่างผู้รับผิดชอบ</legend><input id="technicianSearch" type="search" autocomplete="off" placeholder="พิมพ์เพื่อค้นหาช่าง" aria-controls="technicianOptions"><div id="technicianOptions" class="technician-options" role="group" aria-label="เลือกช่างผู้รับผิดชอบได้มากกว่าหนึ่งคน"></div><small id="technicianError" class="field-error" aria-live="polite"></small></fieldset>
+    </div><label class="field">หัวข้องาน<input id="jobTitle" maxlength="180" placeholder="เช่น ปลั๊กไฟบริเวณครัวเสีย" required></label><label class="field">รายละเอียดงาน<textarea id="jobDescription" maxlength="4000" placeholder="รายละเอียดเพิ่มเติม..."></textarea></label><div class="actions"><button class="cancel" id="cancelJob" type="button">ยกเลิก</button><button class="save" id="saveJob" type="submit">บันทึกงาน</button></div></form>
+  </div>
+
+  <div class="modal" id="statusModal" role="dialog" aria-modal="true" aria-labelledby="statusModalTitle"><form class="box" id="statusForm"><h2 id="statusModalTitle">รายละเอียดงาน</h2><p id="selectedJobLabel"></p><dl class="job-details"><div><dt>วันและเวลานัดหมาย</dt><dd id="detailSchedule"></dd></div><div><dt>สาขา</dt><dd id="detailBranch"></dd></div><div><dt>หัวข้องาน</dt><dd id="detailTitle"></dd></div><div><dt>รายละเอียด</dt><dd id="detailDescription"></dd></div><div><dt>ช่างผู้รับผิดชอบ</dt><dd id="detailTechnicians"></dd></div><div><dt>สถานะปัจจุบัน</dt><dd id="detailStatus"></dd></div><div><dt>ผู้เปิดงาน</dt><dd id="detailCreator"></dd></div><div><dt>เปิดงานเมื่อ</dt><dd id="detailCreatedAt"></dd></div></dl><div id="detailImages"></div><div id="jobAdminActions"><div id="statusAdminControls"><label class="field">เปลี่ยนสถานะ<select id="jobStatus"><option value="waiting">รอดำเนินการ</option><option value="progress">กำลังดำเนินการ</option><option value="overdue">เกินกำหนด</option><option value="approval">รออนุมัติปิดงาน</option></select></label></div><label class="field">เพิ่มรูปภาพงานก่อนปิดงาน<input id="closeImage" type="file" accept="image/jpeg,image/png,image/webp"><small>JPG, PNG หรือ WebP ขนาดไม่เกิน 3 MB</small></label><div class="actions"><button class="primary" id="uploadImageButton" type="button">อัปโหลดรูป</button><button class="primary" id="editJobButton" type="button">แก้ไขงาน</button><button class="danger" id="cancelJobButton" type="button">ยกเลิกงานนี้</button><button class="complete" id="closeJobButton" type="button">ปิดงาน</button><button class="save" id="saveStatusButton" type="submit">บันทึกสถานะ</button></div></div><div class="actions"><button class="cancel" id="cancelStatus" type="button">ปิดรายละเอียด</button></div></form></div>
+  <script type="module" src="./maintenance.js"></script>
+</body>
+</html>
