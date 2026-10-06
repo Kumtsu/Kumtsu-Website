@@ -122,10 +122,37 @@ begin
 end;
 $$;
 
+create or replace function public.delete_it_job(
+  p_job_id bigint, p_actor_email text
+) returns boolean
+language plpgsql security invoker set search_path = public
+as $$
+declare v_exists boolean;
+begin
+  select exists(select 1 from public.it_jobs where id = p_job_id) into v_exists;
+  if not v_exists then return false; end if;
+  update public.it_inventory_items item
+    set quantity = item.quantity + issued.total_quantity,
+        updated_by_email = p_actor_email,
+        updated_at = now()
+    from (
+      select inventory_item_id, sum(quantity)::integer as total_quantity
+      from public.it_job_inventory_issues
+      where job_id = p_job_id
+      group by inventory_item_id
+    ) issued
+    where item.id = issued.inventory_item_id;
+  delete from public.it_jobs where id = p_job_id;
+  return true;
+end;
+$$;
+
 revoke execute on function public.issue_it_inventory(bigint,bigint,integer,text) from public, anon, authenticated;
 revoke execute on function public.complete_it_repair(bigint,text) from public, anon, authenticated;
+revoke execute on function public.delete_it_job(bigint,text) from public, anon, authenticated;
 grant execute on function public.issue_it_inventory(bigint,bigint,integer,text) to service_role;
 grant execute on function public.complete_it_repair(bigint,text) to service_role;
+grant execute on function public.delete_it_job(bigint,text) to service_role;
 
 comment on table public.it_jobs is 'Card 07: IT service desk tickets';
 comment on table public.it_inventory_items is 'Card 07: IT inventory by branch and serial number';

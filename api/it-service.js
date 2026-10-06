@@ -109,13 +109,26 @@ module.exports = async function handler(req, res) {
       const id = Number(body.id); const status = text(body.status, 30);
       const assignedTo = Array.isArray(body.assignedTo) ? body.assignedTo.map(email).filter((value) => IT_EMAILS.has(value)) : [];
       const scheduledDate = body.scheduledDate ? text(body.scheduledDate, 10) : null;
-      if (!Number.isSafeInteger(id) || !STATUSES.has(status) || !assignedTo.length || (scheduledDate && !/^\d{4}-\d{2}-\d{2}$/.test(scheduledDate))) return send(res, 400, { message: 'ข้อมูลงานไม่ถูกต้อง' });
-      const patch = { status, assigned_to: assignedTo, scheduled_date: scheduledDate, updated_at: new Date().toISOString() };
+      const requestDate = text(body.requestDate, 10);
+      const position = text(body.position, 80);
+      const branch = text(body.branch, 120);
+      const issueType = text(body.issueType, 120);
+      const description = text(body.description, 4000);
+      if (!Number.isSafeInteger(id) || !STATUSES.has(status) || !assignedTo.length || !/^\d{4}-\d{2}-\d{2}$/.test(requestDate) || !POSITIONS.has(position) || !branch || !issueType || !description || (scheduledDate && !/^\d{4}-\d{2}-\d{2}$/.test(scheduledDate))) return send(res, 400, { message: 'กรุณากรอกข้อมูลงานและผู้รับผิดชอบให้ครบถ้วน' });
+      const patch = { request_date: requestDate, position, branch, issue_type: issueType, description, status, assigned_to: assignedTo, scheduled_date: scheduledDate, updated_at: new Date().toISOString() };
       if (status === 'completed') { patch.closed_at = new Date().toISOString(); patch.closed_by_email = actor; }
       const result = await db(`/rest/v1/it_jobs?id=eq.${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Prefer: 'return=representation' }, body: JSON.stringify(patch) });
       if (!result[0]) return send(res, 404, { message: 'ไม่พบงาน' });
-      await audit(id, 'job_updated', { status, assigned_to: assignedTo, scheduled_date: scheduledDate }, actor);
+      await audit(id, 'job_updated', { request_date: requestDate, position, branch, issue_type: issueType, description, status, assigned_to: assignedTo, scheduled_date: scheduledDate }, actor);
       return send(res, 200, { message: status === 'completed' ? 'ปิดงานเรียบร้อยแล้ว' : 'อัปเดตงานเรียบร้อยแล้ว', job: result[0] });
+    }
+
+    if (req.method === 'DELETE' && action === 'delete-job') {
+      const id = Number(body.id);
+      if (!Number.isSafeInteger(id)) return send(res, 400, { message: 'ข้อมูลงานไม่ถูกต้อง' });
+      const result = await db('/rest/v1/rpc/delete_it_job', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ p_job_id: id, p_actor_email: actor }) });
+      if (!result) return send(res, 404, { message: 'ไม่พบงานที่ต้องการลบ' });
+      return send(res, 200, { message: 'ลบงานและคืนจำนวนอุปกรณ์เข้าสต๊อกเรียบร้อยแล้ว' });
     }
 
     if (req.method === 'PATCH' && action === 'edit-inventory') {
