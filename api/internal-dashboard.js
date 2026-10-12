@@ -8,6 +8,7 @@ const systems = [
   { id: '05', title: 'SOP Detail', description: 'ระบบค้นหาและตรวจสอบมาตรฐานการทำเมนู', url: '/internal/sol-detail', status: 'live' },
   { id: '06', title: 'Kumtsu Maintenance', description: 'ระบบจัดการงานช่างและประวัติการซ่อมสาขา', url: '/internal/maintenance', status: 'live' },
   { id: '07', title: 'Kumtsu IT Service Desk', description: 'ระบบแจ้งปัญหา ติดตามงาน และจัดการสต๊อกอุปกรณ์ไอที', url: '/internal/it-service', status: 'live' },
+  { id: '08', title: 'Kumtsu & CloudKitchen', description: 'ระบบจัดการสาขา แบรนด์ Cloud Kitchen และเอกสารลูกค้า', url: '/internal/cloud-kitchen', status: 'live' },
 ];
 
 module.exports = async function handler(req, res) {
@@ -27,3 +28,5 @@ module.exports = async function handler(req, res) {
     return send(res, 503, { message: 'ไม่สามารถโหลดระบบงานภายในได้' });
   }
 };
+
+module.exports._test = { systems };

@@ -4,7 +4,7 @@ if (!requireSession()) throw new Error('Authentication required');
 document.querySelector('#logoutButton').addEventListener('click', () => { clearSession(); location.replace('./login.html'); });
 
 async function loadDashboard() {
-  const { response, data } = await api('/api/internal-dashboard');
+  const { response, data } = await api('/api/internal-dashboard?v=card-08-restored-20261009');
   if (!response.ok) throw new Error(data.message || 'ไม่สามารถตรวจสอบสิทธิ์สมาชิกได้');
   const profile = data.profile;
   document.querySelector('#headerName').textContent = `${profile.first_name} ${profile.last_name}`;
