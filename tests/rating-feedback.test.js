@@ -45,7 +45,7 @@ test('returns all review records to an active internal user', async (t) => {
   const res = response();
   await handler(request('Bearer valid-token'), res);
   assert.equal(res.statusCode, 200);
-  assert.equal(res.body.records.length, 345);
+  assert.equal(res.body.records.length, 424);
   assert.deepEqual(res.body.issues, {});
   assert.ok(res.body.areaManagers.some((entry) => (
     entry.email === 'pachara.r@kumtsu.com'
