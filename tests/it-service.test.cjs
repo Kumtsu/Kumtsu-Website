@@ -14,3 +14,7 @@ test('Card 07 normalizes email and bounds text', () => {
   assert.equal(_test.email(' Pachara.R@KUMTSU.COM '), 'pachara.r@kumtsu.com');
   assert.equal(_test.text('abcdef', 3), 'abc');
 });
+
+test('Card 07 loads the company asset number for inventory records', () => {
+  assert.match(_test.ITEM_SELECT, /asset_number/);
+});
