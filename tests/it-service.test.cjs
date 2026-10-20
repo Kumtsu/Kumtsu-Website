@@ -18,3 +18,9 @@ test('Card 07 normalizes email and bounds text', () => {
 test('Card 07 loads the company asset number for inventory records', () => {
   assert.match(_test.ITEM_SELECT, /asset_number/);
 });
+
+test('Card 07 loads stock-transfer destination details', () => {
+  assert.match(_test.ISSUE_SELECT, /destination_inventory_item_id/);
+  assert.match(_test.ISSUE_SELECT, /source_branch/);
+  assert.match(_test.ISSUE_SELECT, /source_storage_location/);
+});
