@@ -18,7 +18,11 @@ async function activeProfile(auth) {
 
 async function db(path, options = {}) {
   const result = await serviceSupabase(path, options);
-  if (!result.response.ok) throw new Error(result.data?.message || result.data?.hint || 'Database request failed');
+  if (!result.response.ok) {
+    const error = new Error(result.data?.message || result.data?.hint || 'Database request failed');
+    error.code = result.data?.code;
+    throw error;
+  }
   return result.data || [];
 }
 
@@ -72,7 +76,7 @@ module.exports = async function handler(req, res) {
       const brand = text(body.brand, 120);
       const model = text(body.model, 180);
       const branch = text(body.branch, 120);
-      const location = text(body.storageLocation, 180);
+      const location = text(body.storageLocation, 180) || (body.isInStock === true ? 'อยู่ในคลัง' : '');
       const note = text(body.note, 1000);
       const quantity = Number(body.quantity);
       const minimumQuantity = Math.max(0, Number(body.minimumQuantity) || 0);
@@ -137,7 +141,7 @@ module.exports = async function handler(req, res) {
     if (req.method === 'PATCH' && action === 'edit-inventory') {
       const id = Number(body.id); const quantity = Number(body.quantity);
       if (!Number.isSafeInteger(id) || !Number.isSafeInteger(quantity) || quantity < 0) return send(res, 400, { message: 'ข้อมูลอุปกรณ์ไม่ถูกต้อง' });
-      const update = { equipment_type: text(body.equipmentType,120), brand: text(body.brand,120), model: text(body.model,180), serial_number: text(body.serialNumber,180) || null, asset_number: text(body.assetNumber,180) || null, quantity, minimum_quantity: Math.max(0,Number(body.minimumQuantity)||0), branch: text(body.branch,120), storage_location: text(body.storageLocation,180), is_in_stock: body.isInStock === true, note: text(body.note,1000), updated_by_email: actor, updated_at: new Date().toISOString() };
+      const update = { equipment_type: text(body.equipmentType,120), brand: text(body.brand,120), model: text(body.model,180), serial_number: text(body.serialNumber,180) || null, asset_number: text(body.assetNumber,180) || null, quantity, minimum_quantity: Math.max(0,Number(body.minimumQuantity)||0), branch: text(body.branch,120), storage_location: text(body.storageLocation,180) || (body.isInStock === true ? 'อยู่ในคลัง' : ''), is_in_stock: body.isInStock === true, note: text(body.note,1000), updated_by_email: actor, updated_at: new Date().toISOString() };
       if (!EQUIPMENT_TYPES.has(update.equipment_type) || !update.brand || !update.model || !update.branch || !update.storage_location) return send(res, 400, { message: 'กรุณากรอกข้อมูลอุปกรณ์ให้ครบถ้วน' });
       const result = await db(`/rest/v1/it_inventory_items?id=eq.${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Prefer: 'return=representation' }, body: JSON.stringify(update) });
       return send(res, 200, { message: 'แก้ไขอุปกรณ์เรียบร้อยแล้ว', item: result[0] });
@@ -152,6 +156,7 @@ module.exports = async function handler(req, res) {
 
     return send(res, 400, { message: 'ไม่รองรับคำสั่งนี้' });
   } catch (error) {
+    if (error.code === '23505') return send(res, 409, { message: 'ซีเรียลนัมเบอร์หรือรหัสอุปกรณ์นี้มีอยู่แล้ว กรุณาตรวจสอบรายการเดิมก่อนบันทึก' });
     console.error('[it-service]', error);
     return send(res, 503, { message: 'ระบบงานไอทีขัดข้องชั่วคราว' });
   }
