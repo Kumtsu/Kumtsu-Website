@@ -72,3 +72,26 @@ test('Card 07 loads stock-transfer destination details', () => {
   assert.match(_test.ISSUE_SELECT, /source_branch/);
   assert.match(_test.ISSUE_SELECT, /source_storage_location/);
 });
+
+test('a stalled Card 07 request times out and aborts rather than hanging', async () => {
+  const source = fs.readFileSync(require.resolve('../internal/it-service.js'), 'utf8');
+  let timeout;
+  let signal;
+  const context = vm.createContext({ AbortController, api: async (_path, options) => { signal = options.signal; return new Promise(() => {}); }, setTimeout: fn => { timeout = fn; return 1; }, clearTimeout() {} });
+  vm.runInContext(source.split('\n').find(line => line.startsWith('async function boundedApi')), context);
+  const pending = context.boundedApi('/api/it-service');
+  const rejected = assert.rejects(pending, /ยังยืนยันการบันทึกไม่ได้/);
+  timeout();
+  await rejected;
+  assert.equal(signal.aborted, true);
+});
+
+test('a confirmed save is not reported as failed when refreshing the list fails', async () => {
+  const source = fs.readFileSync(require.resolve('../internal/it-service.js'), 'utf8');
+  const toasts = [];
+  const context = vm.createContext({ boundedApi: async () => ({ response: { ok: true }, data: { message: 'saved', items: [{ id: 1 }] } }), load: async () => { throw new Error('offline'); }, showToast: message => toasts.push(message) });
+  vm.runInContext(source.split('\n').find(line => line.startsWith('const request=')) + '\nthis.runRequest=request;', context);
+  const data = await context.runRequest('POST', { action: 'add-inventory' });
+  assert.equal(data.items[0].id, 1);
+  assert.match(toasts[0], /บันทึกสำเร็จแล้ว/);
+});
