@@ -30,6 +30,7 @@ create table if not exists public.it_inventory_items (
   minimum_quantity integer not null default 0 check (minimum_quantity >= 0),
   branch text not null check (char_length(branch) between 1 and 120),
   storage_location text not null default '',
+  is_in_stock boolean not null default false,
   status text not null default 'available' check (status in ('available','repair','retired')),
   note text not null default '',
   created_by_email text not null,
@@ -48,6 +49,7 @@ create table if not exists public.it_job_inventory_issues (
   destination_inventory_item_id bigint references public.it_inventory_items(id),
   source_branch text,
   source_storage_location text,
+  source_is_in_stock boolean,
   quantity integer not null check (quantity > 0),
   old_device_status text not null default 'not_required' check (old_device_status in ('not_required','pending_return','repair','returned_to_stock')),
   issued_by_email text not null,
@@ -101,7 +103,7 @@ begin
   if not found then raise exception 'Job not found'; end if;
 
   select * into v_item from public.it_inventory_items
-    where id = p_inventory_item_id and status = 'available' for update;
+    where id = p_inventory_item_id and branch = 'สำนักงานใหญ่' and is_in_stock and status = 'available' for update;
   if not found or v_item.quantity < p_quantity then raise exception 'Insufficient inventory'; end if;
 
   if (coalesce(v_item.serial_number,'') <> '' or coalesce(v_item.asset_number,'') <> '')
@@ -113,6 +115,7 @@ begin
     update public.it_inventory_items
       set branch = v_job.branch,
           storage_location = v_job.requester_name,
+          is_in_stock = false,
           updated_by_email = p_actor_email,
           updated_at = now()
       where id = v_item.id
@@ -135,10 +138,10 @@ begin
 
   insert into public.it_job_inventory_issues
     (job_id, inventory_item_id, destination_inventory_item_id, source_branch,
-     source_storage_location, quantity, old_device_status, issued_by_email)
+     source_storage_location, source_is_in_stock, quantity, old_device_status, issued_by_email)
   values
     (p_job_id, p_inventory_item_id, v_destination_id, v_item.branch,
-     v_item.storage_location, p_quantity,
+     v_item.storage_location, v_item.is_in_stock, p_quantity,
      case when v_item.equipment_type in ('มือถือ','ไอแพด') then 'pending_return' else 'not_required' end,
      p_actor_email)
   returning * into v_issue;
@@ -162,7 +165,7 @@ language plpgsql security invoker set search_path = public
 as $$
 declare v_item public.it_inventory_items;
 begin
-  update public.it_inventory_items set status='available', quantity=quantity+1,
+  update public.it_inventory_items set status='available', quantity=quantity+1, branch='สำนักงานใหญ่', is_in_stock=true,
     updated_by_email=p_actor_email, updated_at=now()
     where id=p_inventory_item_id and status='repair' returning * into v_item;
   if not found then raise exception 'Repair item not found'; end if;
@@ -188,6 +191,7 @@ begin
       update public.it_inventory_items
         set branch = coalesce(v_issue.source_branch,branch),
             storage_location = coalesce(v_issue.source_storage_location,storage_location),
+            is_in_stock = coalesce(v_issue.source_is_in_stock,is_in_stock),
             updated_by_email = p_actor_email,
             updated_at = now()
         where id = v_issue.inventory_item_id;
