@@ -30,6 +30,7 @@ create table if not exists public.it_inventory_items (
   minimum_quantity integer not null default 0 check (minimum_quantity >= 0),
   branch text not null check (char_length(branch) between 1 and 120),
   storage_location text not null default '',
+  holder_position text not null default '',
   is_in_stock boolean not null default false,
   status text not null default 'available' check (status in ('available','repair','retired')),
   note text not null default '',
@@ -49,6 +50,7 @@ create table if not exists public.it_job_inventory_issues (
   destination_inventory_item_id bigint references public.it_inventory_items(id),
   source_branch text,
   source_storage_location text,
+  source_holder_position text,
   source_is_in_stock boolean,
   quantity integer not null check (quantity > 0),
   old_device_status text not null default 'not_required' check (old_device_status in ('not_required','pending_return','repair','returned_to_stock')),
@@ -115,6 +117,7 @@ begin
     update public.it_inventory_items
       set branch = v_job.branch,
           storage_location = v_job.requester_name,
+          holder_position = v_job.position,
           is_in_stock = false,
           updated_by_email = p_actor_email,
           updated_at = now()
@@ -129,19 +132,19 @@ begin
 
     insert into public.it_inventory_items
       (equipment_type,brand,model,serial_number,asset_number,quantity,minimum_quantity,
-       branch,storage_location,status,note,created_by_email,updated_by_email)
+       branch,storage_location,holder_position,status,note,created_by_email,updated_by_email)
     values
       (v_item.equipment_type,v_item.brand,v_item.model,null,null,p_quantity,0,
-       v_job.branch,v_job.requester_name,'available',v_item.note,p_actor_email,p_actor_email)
+       v_job.branch,v_job.requester_name,v_job.position,'available',v_item.note,p_actor_email,p_actor_email)
     returning id into v_destination_id;
   end if;
 
   insert into public.it_job_inventory_issues
     (job_id, inventory_item_id, destination_inventory_item_id, source_branch,
-     source_storage_location, source_is_in_stock, quantity, old_device_status, issued_by_email)
+     source_storage_location, source_holder_position, source_is_in_stock, quantity, old_device_status, issued_by_email)
   values
     (p_job_id, p_inventory_item_id, v_destination_id, v_item.branch,
-     v_item.storage_location, v_item.is_in_stock, p_quantity,
+     v_item.storage_location, v_item.holder_position, v_item.is_in_stock, p_quantity,
      case when v_item.equipment_type in ('มือถือ','ไอแพด') then 'pending_return' else 'not_required' end,
      p_actor_email)
   returning * into v_issue;
@@ -191,6 +194,7 @@ begin
       update public.it_inventory_items
         set branch = coalesce(v_issue.source_branch,branch),
             storage_location = coalesce(v_issue.source_storage_location,storage_location),
+            holder_position = coalesce(v_issue.source_holder_position,holder_position),
             is_in_stock = coalesce(v_issue.source_is_in_stock,is_in_stock),
             updated_by_email = p_actor_email,
             updated_at = now()
