@@ -6,6 +6,7 @@ const STATUSES = new Set(['waiting','progress','urgent','completed']);
 const EQUIPMENT_TYPES = new Set(['มือถือ','ไอแพด','เครื่องพิมพ์ใบเสร็จ','เครื่องปริ้น Inkjet','สายชาร์จ Type-C','สายชาร์จ iPad','โน้ตบุ๊ก','เมาส์','คีย์บอร์ด','จอคอมพิวเตอร์','CCTV']);
 const JOB_SELECT = 'id,request_date,requester_user_id,requester_email,requester_name,position,branch,issue_type,description,status,assigned_to,scheduled_date,created_at,updated_at,closed_at,closed_by_email';
 const ITEM_SELECT = 'id,equipment_type,brand,model,serial_number,asset_number,quantity,minimum_quantity,branch,storage_location,status,note,created_by_email,updated_by_email,created_at,updated_at';
+const ISSUE_SELECT = 'id,job_id,inventory_item_id,destination_inventory_item_id,source_branch,source_storage_location,quantity,old_device_status,issued_by_email,issued_at,returned_at';
 
 const email = (value) => String(value || '').trim().toLowerCase();
 const text = (value, max = 4000) => String(value || '').trim().slice(0, max);
@@ -29,7 +30,7 @@ async function loadAll() {
   const [jobs, items, issues] = await Promise.all([
     db(`/rest/v1/it_jobs?select=${JOB_SELECT}&order=request_date.desc,created_at.desc`),
     db(`/rest/v1/it_inventory_items?select=${ITEM_SELECT}&order=equipment_type.asc,branch.asc,created_at.asc`),
-    db('/rest/v1/it_job_inventory_issues?select=id,job_id,inventory_item_id,quantity,old_device_status,issued_by_email,issued_at,returned_at&order=issued_at.asc'),
+    db(`/rest/v1/it_job_inventory_issues?select=${ISSUE_SELECT}&order=issued_at.asc`),
   ]);
   return { jobs, items, issues };
 }
@@ -88,7 +89,7 @@ module.exports = async function handler(req, res) {
       const jobId = Number(body.jobId); const inventoryItemId = Number(body.inventoryItemId); const quantity = Number(body.quantity);
       if (![jobId, inventoryItemId, quantity].every(Number.isSafeInteger) || quantity < 1) return send(res, 400, { message: 'ข้อมูลตัดสต๊อกไม่ถูกต้อง' });
       const issue = await db('/rest/v1/rpc/issue_it_inventory', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ p_job_id: jobId, p_inventory_item_id: inventoryItemId, p_quantity: quantity, p_actor_email: actor }) });
-      return send(res, 200, { message: 'ตัดสต๊อกและผูกกับงานเรียบร้อยแล้ว', issue });
+      return send(res, 200, { message: 'ตัดสต๊อกและโอนอุปกรณ์ไปยังสาขาของงานเรียบร้อยแล้ว', issue });
     }
 
     if (req.method === 'POST' && action === 'complete-repair') {
@@ -156,4 +157,4 @@ module.exports = async function handler(req, res) {
   }
 };
 
-module.exports._test = { email, text, EQUIPMENT_TYPES, POSITIONS, STATUSES, ITEM_SELECT };
+module.exports._test = { email, text, EQUIPMENT_TYPES, POSITIONS, STATUSES, ITEM_SELECT, ISSUE_SELECT };
