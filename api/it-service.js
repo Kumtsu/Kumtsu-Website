@@ -5,8 +5,8 @@ const POSITIONS = new Set(['พนักงานหน้าสาขา','AM',
 const STATUSES = new Set(['waiting','progress','urgent','completed']);
 const EQUIPMENT_TYPES = new Set(['มือถือ','ไอแพด','เครื่องพิมพ์ใบเสร็จ','เครื่องปริ้น Inkjet','สายชาร์จ Type-C','สายชาร์จ iPad','โน้ตบุ๊ก','เมาส์','คีย์บอร์ด','จอคอมพิวเตอร์','CCTV','คอมพิวเตอร์ PC']);
 const JOB_SELECT = 'id,request_date,requester_user_id,requester_email,requester_name,position,branch,issue_type,description,status,assigned_to,scheduled_date,created_at,updated_at,closed_at,closed_by_email';
-const ITEM_SELECT = 'id,equipment_type,brand,model,serial_number,asset_number,quantity,minimum_quantity,branch,storage_location,is_in_stock,status,note,created_by_email,updated_by_email,created_at,updated_at';
-const ISSUE_SELECT = 'id,job_id,inventory_item_id,destination_inventory_item_id,source_branch,source_storage_location,source_is_in_stock,quantity,old_device_status,issued_by_email,issued_at,returned_at';
+const ITEM_SELECT = 'id,equipment_type,brand,model,serial_number,asset_number,quantity,minimum_quantity,branch,storage_location,holder_position,is_in_stock,status,note,created_by_email,updated_by_email,created_at,updated_at';
+const ISSUE_SELECT = 'id,job_id,inventory_item_id,destination_inventory_item_id,source_branch,source_storage_location,source_holder_position,source_is_in_stock,quantity,old_device_status,issued_by_email,issued_at,returned_at';
 
 const email = (value) => String(value || '').trim().toLowerCase();
 const text = (value, max = 4000) => String(value || '').trim().slice(0, max);
@@ -76,6 +76,8 @@ module.exports = async function handler(req, res) {
       const brand = text(body.brand, 120);
       const model = text(body.model, 180);
       const branch = text(body.branch, 120);
+      const holderPosition = text(body.holderPosition, 80);
+      if (holderPosition && !POSITIONS.has(holderPosition)) return send(res, 400, { message: 'ตำแหน่งผู้ครอบครองไม่ถูกต้อง' });
       const location = text(body.storageLocation, 180) || (body.isInStock === true ? 'อยู่ในคลัง' : '');
       const note = text(body.note, 1000);
       const quantity = Number(body.quantity);
@@ -84,7 +86,7 @@ module.exports = async function handler(req, res) {
       const assetNumbers = Array.isArray(body.assetNumbers) ? body.assetNumbers.map((value) => text(value, 180)).filter(Boolean) : [];
       if (!EQUIPMENT_TYPES.has(equipmentType) || !brand || !model || !branch || !location || !Number.isSafeInteger(quantity) || quantity < 1) return send(res, 400, { message: 'กรุณากรอกข้อมูลอุปกรณ์ให้ครบถ้วน' });
       const hasIndividualCodes = serials.length || assetNumbers.length;
-      const rows = hasIndividualCodes ? Array.from({ length: quantity }, (_, index) => ({ equipment_type: equipmentType, brand, model, serial_number: serials[index] || null, asset_number: assetNumbers[index] || null, quantity: 1, minimum_quantity: minimumQuantity, branch, storage_location: location, is_in_stock: body.isInStock === true, note, created_by_email: actor, updated_by_email: actor })) : [{ equipment_type: equipmentType, brand, model, serial_number: null, asset_number: null, quantity, minimum_quantity: minimumQuantity, branch, storage_location: location, is_in_stock: body.isInStock === true, note, created_by_email: actor, updated_by_email: actor }];
+      const rows = hasIndividualCodes ? Array.from({ length: quantity }, (_, index) => ({ equipment_type: equipmentType, brand, model, serial_number: serials[index] || null, asset_number: assetNumbers[index] || null, quantity: 1, minimum_quantity: minimumQuantity, branch, storage_location: location, holder_position: holderPosition, is_in_stock: body.isInStock === true, note, created_by_email: actor, updated_by_email: actor })) : [{ equipment_type: equipmentType, brand, model, serial_number: null, asset_number: null, quantity, minimum_quantity: minimumQuantity, branch, storage_location: location, holder_position: holderPosition, is_in_stock: body.isInStock === true, note, created_by_email: actor, updated_by_email: actor }];
       const result = await db('/rest/v1/it_inventory_items', { method: 'POST', headers: { 'Content-Type': 'application/json', Prefer: 'return=representation' }, body: JSON.stringify(rows) });
       return send(res, 201, { message: 'เพิ่มอุปกรณ์เข้าคลังและสาขาเรียบร้อยแล้ว', items: result });
     }
@@ -141,7 +143,9 @@ module.exports = async function handler(req, res) {
     if (req.method === 'PATCH' && action === 'edit-inventory') {
       const id = Number(body.id); const quantity = Number(body.quantity);
       if (!Number.isSafeInteger(id) || !Number.isSafeInteger(quantity) || quantity < 0) return send(res, 400, { message: 'ข้อมูลอุปกรณ์ไม่ถูกต้อง' });
-      const update = { equipment_type: text(body.equipmentType,120), brand: text(body.brand,120), model: text(body.model,180), serial_number: text(body.serialNumber,180) || null, asset_number: text(body.assetNumber,180) || null, quantity, minimum_quantity: Math.max(0,Number(body.minimumQuantity)||0), branch: text(body.branch,120), storage_location: text(body.storageLocation,180) || (body.isInStock === true ? 'อยู่ในคลัง' : ''), is_in_stock: body.isInStock === true, note: text(body.note,1000), updated_by_email: actor, updated_at: new Date().toISOString() };
+      const holderPosition = text(body.holderPosition,80);
+      if (holderPosition && !POSITIONS.has(holderPosition)) return send(res, 400, { message: 'ตำแหน่งผู้ครอบครองไม่ถูกต้อง' });
+      const update = { equipment_type: text(body.equipmentType,120), brand: text(body.brand,120), model: text(body.model,180), serial_number: text(body.serialNumber,180) || null, asset_number: text(body.assetNumber,180) || null, quantity, minimum_quantity: Math.max(0,Number(body.minimumQuantity)||0), branch: text(body.branch,120), storage_location: text(body.storageLocation,180) || (body.isInStock === true ? 'อยู่ในคลัง' : ''), holder_position: holderPosition, is_in_stock: body.isInStock === true, note: text(body.note,1000), updated_by_email: actor, updated_at: new Date().toISOString() };
       if (!EQUIPMENT_TYPES.has(update.equipment_type) || !update.brand || !update.model || !update.branch || !update.storage_location) return send(res, 400, { message: 'กรุณากรอกข้อมูลอุปกรณ์ให้ครบถ้วน' });
       const result = await db(`/rest/v1/it_inventory_items?id=eq.${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Prefer: 'return=representation' }, body: JSON.stringify(update) });
       return send(res, 200, { message: 'แก้ไขอุปกรณ์เรียบร้อยแล้ว', item: result[0] });
