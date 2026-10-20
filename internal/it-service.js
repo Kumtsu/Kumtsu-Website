@@ -6,8 +6,8 @@ const BRANCHES=['สุขุมวิท 31','ราชเทวี','สาท
 const ALL_BRANCHES=[HEAD_OFFICE,...BRANCHES];
 const POSITIONS=['พนักงานหน้าสาขา','AM','OM','ACC','HR','Audit','Admin','Marketing','IT','Purchase','Inventory','Production','QC','Owner'];
 const ISSUE_TYPES=['FoodStory','App LINE MAN, Grab, ShopeeFood, Robinhood','Internet','Accessories & Cable','Mobile','iPad','CCTV','Printer','Notebook','Email','Open Brand'];
-const TYPES=['มือถือ','ไอแพด','เครื่องพิมพ์ใบเสร็จ','เครื่องปริ้น Inkjet','สายชาร์จ Type-C','สายชาร์จ iPad','โน้ตบุ๊ก','เมาส์','คีย์บอร์ด','จอคอมพิวเตอร์','CCTV','คอมพิวเตอร์ PC'];
-const BRANCH_TYPES=['มือถือ','ไอแพด','เครื่องพิมพ์ใบเสร็จ','CCTV','จอคอมพิวเตอร์','เครื่องปริ้น Inkjet','คอมพิวเตอร์ PC'];
+const TYPES=['มือถือ','ไอแพด','เครื่องพิมพ์ใบเสร็จ','เครื่องปริ้น Inkjet','สายชาร์จ Type-C','สายชาร์จ iPad','โน้ตบุ๊ก','เมาส์','คีย์บอร์ด','จอคอมพิวเตอร์','CCTV','คอมพิวเตอร์ PC','Macbook'];
+const BRANCH_TYPES=['มือถือ','ไอแพด','เครื่องพิมพ์ใบเสร็จ','CCTV','จอคอมพิวเตอร์','เครื่องปริ้น Inkjet','คอมพิวเตอร์ PC','Macbook'];
 const STATUS={waiting:'รอดำเนินการ',progress:'กำลังดำเนินการ',urgent:'เร่งด่วน',completed:'เสร็จสิ้น'};
 const TECH_NAMES={'pachara.r@kumtsu.com':'พชร รัตนเขมากร','krissana.s@kumtsu.com':'กฤษณะ ศรีล้านมี'};
 const $=id=>document.getElementById(id); let state={jobs:[],items:[],issues:[],profile:{},permissions:{}},selectedJob=null,calendarDate=new Date();
