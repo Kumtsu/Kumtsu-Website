@@ -38,6 +38,26 @@ test('assigned equipment still requires a holder', async () => {
   assert.equal(result.saved, undefined);
 });
 
+test('equipment holder positions can be saved and edited without changing the holder', async () => {
+  const added = await inventoryRequest({ ...inventoryBody, storageLocation: 'ผู้ครอบครองเดิม', holderPosition: 'AM' });
+  assert.equal(added.status, 201);
+  assert.equal(added.saved[0].holder_position, 'AM');
+  assert.equal(added.saved[0].storage_location, 'ผู้ครอบครองเดิม');
+  const edited = await inventoryRequest({ ...inventoryBody, action: 'edit-inventory', id: 1, storageLocation: 'ผู้ครอบครองเดิม', holderPosition: 'IT' }, 'PATCH');
+  assert.equal(edited.status, 200);
+  assert.equal(edited.saved.holder_position, 'IT');
+  assert.equal(edited.saved.storage_location, 'ผู้ครอบครองเดิม');
+});
+
+test('holder position is optional for existing records and rejects unknown positions', async () => {
+  const legacy = await inventoryRequest(inventoryBody);
+  assert.equal(legacy.status, 201);
+  assert.equal(legacy.saved[0].holder_position, '');
+  const invalid = await inventoryRequest({ ...inventoryBody, holderPosition: 'invalid' });
+  assert.equal(invalid.status, 400);
+  assert.equal(invalid.saved, undefined);
+});
+
 test('warehouse equipment can be edited without an assigned holder', async () => {
   const result = await inventoryRequest({ ...inventoryBody, action: 'edit-inventory', id: 1 }, 'PATCH');
   assert.equal(result.status, 200);
