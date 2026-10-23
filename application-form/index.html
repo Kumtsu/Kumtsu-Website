@@ -167,7 +167,7 @@
         </div>
         <ol class="steps" aria-label="ขั้นตอนการสมัครงาน">
           <li>กรอกข้อมูลให้ครบถ้วน</li>
-          <li>แนบเรซูเม่ไม่เกิน 4 MB</li>
+          <li>แนบเรซูเม่ได้ (ไม่บังคับ)</li>
           <li>ส่งต่อให้ฝ่ายบุคคลทาง LINE</li>
         </ol>
       </section>
@@ -216,9 +216,9 @@
                 <span class="error" data-error-for="address"></span>
               </div>
               <div class="field field-full">
-                <label for="resume">เรซูเม่ <span class="required">*</span></label>
-                <input id="resume" name="resume" type="file" required accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
-                <span class="hint">รองรับไฟล์ .pdf, .doc และ .docx ขนาดสูงสุด 4 MB</span>
+                <label for="resume">เรซูเม่ <span class="hint">(ไม่บังคับ)</span></label>
+                <input id="resume" name="resume" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+                <span class="hint">หากต้องการแนบ รองรับไฟล์ .pdf, .doc และ .docx ขนาดสูงสุด 4 MB</span>
                 <span class="error" data-error-for="resume"></span>
               </div>
               <div class="consent">
@@ -304,8 +304,7 @@
       let message = '';
       if (field.type === 'file') {
         const file = field.files[0];
-        if (!file) message = 'กรุณาแนบไฟล์เรซูเม่';
-        else {
+        if (file) {
           const extension = file.name.split('.').pop().toLowerCase();
           if (!['pdf', 'doc', 'docx'].includes(extension)) message = 'กรุณาเลือกไฟล์ .pdf, .doc หรือ .docx เท่านั้น';
           else if (file.size > 4 * 1024 * 1024) message = 'ไฟล์มีขนาดเกิน 4 MB';
@@ -352,7 +351,7 @@
         `อีเมล: ${data.get('email')}`,
         `เบอร์ติดต่อ: ${data.get('phone')}`,
         `ที่อยู่: ${data.get('address')}`,
-        `ไฟล์เรซูเม่: ${file.name}`
+        `ไฟล์เรซูเม่: ${file ? file.name : 'ไม่ได้แนบ'}`
       ].join('\n');
       await copySummary();
       result.classList.add('is-visible');
