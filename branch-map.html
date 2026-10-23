@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>แผนที่สาขาคุ้มสึ</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
+  <link rel="stylesheet" href="./branch-map.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous" defer></script>
+  <script src="./branch-locations.js" defer></script>
+  <script src="./branch-map.js" defer></script>
+</head>
+<body>
+  <div id="branchMapCanvas" class="branch-map-canvas" role="region" aria-label="แผนที่หมุดสาขาคุ้มสึ ใช้ปุ่มบวกหรือลบเพื่อปรับขนาดแผนที่" tabindex="0"></div>
+  <div id="branchMapNotice" class="branch-map-notice" role="status" aria-live="polite">
+    <strong>กำลังโหลดแผนที่สาขาคุ้มสึ…</strong>
+    <p>คุณสามารถเลือกสาขาจากรายชื่อด้านข้างเพื่อดูที่อยู่และเปิดแผนที่นำทางได้</p>
+  </div>
+  <p id="branchMapStatus" class="visually-hidden" role="status" aria-live="polite"></p>
+</body>
+</html>

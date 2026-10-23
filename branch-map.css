@@ -1,0 +1,21 @@
+html, body { width: 100%; height: 100%; margin: 0; }
+body { position: relative; overflow: hidden; background: #1e1e1e; color: #f5f5f5; font-family: system-ui, -apple-system, "Helvetica Neue", sans-serif; }
+.branch-map-canvas { width: 100%; height: 100%; background: #e8ede8; }
+.branch-map-canvas:focus-visible { outline: 3px solid #1ca650; outline-offset: -3px; }
+.branch-map-notice { position: absolute; z-index: 1000; inset: 24px; display: flex; flex-direction: column; justify-content: center; padding: 24px; border: 1px solid #3c5140; border-radius: 12px; background: #18221b; text-align: center; line-height: 1.65; }
+.branch-map-notice[hidden] { display: none; }
+.branch-map-notice strong { font-size: 1.1rem; }
+.branch-map-notice p { margin: 12px 0 0; color: #c5d3c8; }
+.branch-marker { border: 0; background: transparent; }
+.branch-marker span { display: grid; width: 34px; height: 34px; place-items: center; border: 2px solid white; border-radius: 50% 50% 50% 0; background: #168b41; box-shadow: 0 3px 9px #0005; color: #fff; font: 800 13px/1 system-ui, sans-serif; transform: rotate(-45deg); }
+.branch-marker b { display: block; transform: rotate(45deg); }
+.branch-marker[aria-current="true"] span { background: #075a28; box-shadow: 0 0 0 4px #32c76b55, 0 3px 9px #0005; }
+.branch-marker:focus-visible { outline: 3px solid #072e16; outline-offset: 5px; }
+.branch-popup { min-width: 170px; max-width: 260px; color: #202820; font: 14px/1.6 system-ui, -apple-system, "Helvetica Neue", sans-serif; }
+.branch-popup strong { display: block; font-size: 16px; }
+.branch-popup p { margin: 8px 0 12px; }
+.branch-popup a { display: inline-block; padding: 9px 12px; border-radius: 8px; background: #168b41; color: #fff; font-weight: 700; text-decoration: none; }
+.branch-popup a:hover, .branch-popup a:focus-visible { background: #0d6c30; }
+.leaflet-control-attribution { max-width: calc(100% - 18px); font-size: 10px; line-height: 1.4; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+@media (max-width: 500px) { .branch-map-notice { inset: 16px; padding: 18px; } }

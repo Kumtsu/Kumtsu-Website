@@ -1,0 +1,16 @@
+.branch-grid li { display: block; padding: 0; cursor: default; }
+.branch-select { display: flex; align-items: flex-start; gap: 11px; width: 100%; padding: 13px; border: 0; background: transparent; color: inherit; font: inherit; line-height: 1.4; text-align: left; cursor: pointer; }
+.branch-select:focus-visible, .branch-directions:focus-visible { outline: 2px solid var(--green); outline-offset: -3px; border-radius: 8px; }
+.branch-copy { display: block; min-width: 0; }
+.branch-name { display: block; color: #f5f5f5; font-weight: 800; }
+.branch-address { display: block; margin-top: 6px; color: #bfc5bf; font-size: .78rem; font-weight: 400; line-height: 1.6; overflow-wrap: anywhere; }
+.branch-directions { display: inline-block; margin: 0 13px 12px 52px; padding: 5px 0; color: #62d68c; font-size: .78rem; font-weight: 700; }
+.branch-directions:hover { text-decoration: underline; }
+.branches .branch-map { background: #e8ece8; }
+.branches .branch-map iframe { filter: none; }
+@media (max-width: 620px) {
+  .branch-grid li { padding: 0; }
+  .branch-select { padding: 11px 9px; gap: 8px; }
+  .branch-address { font-size: .74rem; }
+  .branch-directions { margin-left: 45px; }
+}
