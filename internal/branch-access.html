@@ -66,6 +66,7 @@
   <dialog id="editDialog" class="edit-dialog">
     <form id="editForm" method="dialog">
       <div class="dialog-head"><div><p id="dialogMode" class="eyebrow">ADMIN EDIT</p><h2 id="editTitle">แก้ไขข้อมูล</h2></div><button class="icon-button" type="button" data-close-dialog aria-label="ปิด">×</button></div>
+      <p id="formContext" class="form-context" hidden></p>
       <div id="editFields" class="edit-fields"></div>
       <div id="editError" class="form-error" hidden></div>
       <div class="dialog-actions"><button class="button secondary" type="button" data-close-dialog>ยกเลิก</button><button id="saveButton" class="button primary" type="submit">บันทึกข้อมูล</button></div>
@@ -73,6 +74,7 @@
   </dialog>
 
   <div id="toast" class="toast" role="status" hidden></div>
+  <script src="./branch-access-catalog.js"></script>
   <script type="module" src="./branch-access.js"></script>
 </body>
 </html>

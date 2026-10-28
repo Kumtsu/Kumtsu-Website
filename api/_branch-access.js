@@ -1,5 +1,6 @@
 const crypto = require('node:crypto');
 const { currentUser, send, serviceSupabase, supabase } = require('./_internal-auth');
+const { BRAND_OPTIONS, CHANNEL_OPTIONS, brandCode } = require('../internal/branch-access-catalog');
 
 const ADMIN_EMAIL = 'pachara.r@kumtsu.com';
 const TABLES = {
@@ -93,18 +94,24 @@ function cleanChanges(entity, input) {
   return output;
 }
 
-function cleanCreate(entity, input) {
-  if (entity !== 'branch' && entity !== 'brand') return null;
+function cleanCreate(entity, input, context = {}) {
+  if (!['branch', 'brand', 'channel'].includes(entity)) return null;
   const config = TABLES[entity];
   const output = {};
   for (const field of config.fields) output[field] = String(input?.[field] || '').trim().slice(0, 500);
 
-  if (!output.name || !output.code) return null;
-  if (entity === 'brand') {
-    const branchId = Number(input?.branch_id);
+  if (!output.name || (entity === 'branch' && !output.code)) return null;
+  if (entity === 'brand' || entity === 'channel') {
+    const parentField = entity === 'brand' ? 'branch_id' : 'brand_id';
+    const parentId = Number(input?.[parentField]);
     const password = String(input?.password || '');
-    if (!Number.isSafeInteger(branchId) || branchId <= 0 || !output.login_identifier || !password) return null;
-    output.branch_id = branchId;
+    if (!Number.isSafeInteger(parentId) || parentId <= 0 || !output.login_identifier || !password) return null;
+    if (entity === 'brand') {
+      if (!BRAND_OPTIONS.some((brand) => brand.name === output.name)) return null;
+      output.code = brandCode(output.name, context.branchCode);
+      if (!output.code) return null;
+    } else if (!CHANNEL_OPTIONS.includes(output.name)) return null;
+    output[parentField] = parentId;
     output.password_encrypted = encryptSecret(password);
   }
   output.updated_at = new Date().toISOString();
