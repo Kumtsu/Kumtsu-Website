@@ -28,9 +28,23 @@ create table if not exists public.branch_access_channels (
   name text not null,
   login_identifier text not null default '',
   password_encrypted text not null,
+  wongnai_pos_pin_encrypted text,
   updated_at timestamptz not null default now(),
   unique (brand_id, name)
 );
+
+create table if not exists public.branch_access_foodstory (
+  id bigint primary key,
+  branch_id bigint not null unique references public.branch_access_branches(id) on delete cascade,
+  login_identifier text not null default '',
+  password_encrypted text not null,
+  wongnai_pos_pin_encrypted text,
+  updated_at timestamptz not null default now()
+);
+
+-- Existing FoodStory accounts keep the optional POS PIN empty until an admin enters it.
+alter table public.branch_access_channels add column if not exists wongnai_pos_pin_encrypted text;
+alter table public.branch_access_foodstory add column if not exists wongnai_pos_pin_encrypted text;
 
 create table if not exists public.branch_access_audit (
   id bigint generated always as identity primary key,
@@ -48,20 +62,24 @@ create index if not exists branch_access_audit_created_idx on public.branch_acce
 alter table public.branch_access_branches enable row level security;
 alter table public.branch_access_brands enable row level security;
 alter table public.branch_access_channels enable row level security;
+alter table public.branch_access_foodstory enable row level security;
 alter table public.branch_access_audit enable row level security;
 
 revoke all on table public.branch_access_branches from anon, authenticated;
 revoke all on table public.branch_access_brands from anon, authenticated;
 revoke all on table public.branch_access_channels from anon, authenticated;
+revoke all on table public.branch_access_foodstory from anon, authenticated;
 revoke all on table public.branch_access_audit from anon, authenticated;
 
 grant select, insert, update, delete on table public.branch_access_branches to service_role;
 grant select, insert, update, delete on table public.branch_access_brands to service_role;
 grant select, insert, update, delete on table public.branch_access_channels to service_role;
+grant select, insert, update, delete on table public.branch_access_foodstory to service_role;
 grant select, insert on table public.branch_access_audit to service_role;
 grant usage, select on sequence public.branch_access_audit_id_seq to service_role;
 
 comment on table public.branch_access_branches is 'Card 04: branch master data for internal credential access';
 comment on table public.branch_access_brands is 'Card 04: per-branch brand credentials encrypted by the application';
 comment on table public.branch_access_channels is 'Card 04: per-brand sales-channel credentials encrypted by the application';
+comment on table public.branch_access_foodstory is 'Card 04: one encrypted FoodStory POS account per branch, independent of brands';
 comment on table public.branch_access_audit is 'Card 04: immutable server-side edit audit trail';

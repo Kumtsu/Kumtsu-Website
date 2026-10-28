@@ -52,6 +52,8 @@
           <a id="branchMap" class="meta-card" href="#" target="_blank" rel="noreferrer"><span>แผนที่</span><strong>เปิดพิกัด ↗</strong></a>
         </div>
 
+        <section id="foodstoryPanel" class="branch-foodstory-card" aria-label="บัญชี FoodStory ประจำสาขา"></section>
+
         <section class="section-heading">
           <div><p class="eyebrow">ACCOUNTS</p><h3>แบรนด์และช่องทางขาย</h3></div>
           <div class="section-actions"><p id="accountSummary" class="muted"></p><button id="addBrandButton" class="button primary admin-only" type="button" hidden>+ เพิ่มแบรนด์</button></div>
@@ -66,6 +68,7 @@
   <dialog id="editDialog" class="edit-dialog">
     <form id="editForm" method="dialog">
       <div class="dialog-head"><div><p id="dialogMode" class="eyebrow">ADMIN EDIT</p><h2 id="editTitle">แก้ไขข้อมูล</h2></div><button class="icon-button" type="button" data-close-dialog aria-label="ปิด">×</button></div>
+      <p id="formContext" class="form-context" hidden></p>
       <div id="editFields" class="edit-fields"></div>
       <div id="editError" class="form-error" hidden></div>
       <div class="dialog-actions"><button class="button secondary" type="button" data-close-dialog>ยกเลิก</button><button id="saveButton" class="button primary" type="submit">บันทึกข้อมูล</button></div>
@@ -73,6 +76,7 @@
   </dialog>
 
   <div id="toast" class="toast" role="status" hidden></div>
+  <script src="./branch-access-catalog.js"></script>
   <script type="module" src="./branch-access.js"></script>
 </body>
 </html>

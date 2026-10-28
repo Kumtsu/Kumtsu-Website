@@ -1,5 +1,6 @@
 const crypto = require('node:crypto');
 const { currentUser, send, serviceSupabase, supabase } = require('./_internal-auth');
+const { BRAND_OPTIONS, CHANNEL_OPTIONS, brandCode, isFoodstory } = require('../internal/branch-access-catalog');
 
 const ADMIN_EMAIL = 'pachara.r@kumtsu.com';
 const TABLES = {
@@ -14,6 +15,10 @@ const TABLES = {
   channel: {
     table: 'branch_access_channels',
     fields: ['name', 'login_identifier'],
+  },
+  foodstory: {
+    table: 'branch_access_foodstory',
+    fields: ['login_identifier'],
   },
 };
 
@@ -59,52 +64,77 @@ async function requireActiveUser(req, res) {
   return { auth, profile, canEdit: normalizedEmail(auth.user.email || profile.email) === ADMIN_EMAIL };
 }
 
-async function readTable(path) {
+async function readTable(path, { allowMissing = false, allowMissingPin = false } = {}) {
   const result = await serviceSupabase(path, { headers: { Accept: 'application/json' } });
+  if (!result.response.ok && allowMissing && ['PGRST205', '42P01'].includes(result.data?.code)) return [];
+  if (!result.response.ok && allowMissingPin && result.data?.code === '42703' && String(result.data?.message || '').includes('wongnai_pos_pin_encrypted')) {
+    return readTable(path.replace(',wongnai_pos_pin_encrypted', ''), { allowMissing });
+  }
   if (!result.response.ok) throw new Error(result.data?.message || 'Database request failed');
   return Array.isArray(result.data) ? result.data : [];
 }
 
 async function loadSnapshot() {
-  const [branches, brands, channels] = await Promise.all([
+  const [branches, brands, channels, foodstory] = await Promise.all([
     readTable('/rest/v1/branch_access_branches?select=id,code,name,address,phone,coordinates&order=id.asc'),
     readTable('/rest/v1/branch_access_brands?select=id,branch_id,name,code,login_identifier,password_encrypted&order=id.asc'),
-    readTable('/rest/v1/branch_access_channels?select=id,brand_id,name,login_identifier,password_encrypted&order=id.asc'),
+    readTable('/rest/v1/branch_access_channels?select=id,brand_id,name,login_identifier,password_encrypted,wongnai_pos_pin_encrypted&order=id.asc', { allowMissingPin: true }),
+    readTable('/rest/v1/branch_access_foodstory?select=id,branch_id,login_identifier,password_encrypted,wongnai_pos_pin_encrypted&order=id.asc', { allowMissing: true, allowMissingPin: true }),
   ]);
   return {
     branches,
     brands: brands.map(({ password_encrypted, ...row }) => ({ ...row, has_password: Boolean(password_encrypted) })),
-    channels: channels.map(({ password_encrypted, ...row }) => ({ ...row, has_password: Boolean(password_encrypted) })),
+    channels: channels.map(({ password_encrypted, wongnai_pos_pin_encrypted, ...row }) => ({ ...row, has_password: Boolean(password_encrypted), has_wongnai_pos_pin: Boolean(wongnai_pos_pin_encrypted) })),
+    foodstory: foodstory.map(({ password_encrypted, wongnai_pos_pin_encrypted, ...row }) => ({ ...row, has_password: Boolean(password_encrypted), has_wongnai_pos_pin: Boolean(wongnai_pos_pin_encrypted) })),
   };
 }
 
-function cleanChanges(entity, input) {
+function validWongnaiPosPin(value) {
+  return typeof value === 'string' && (value === '' || (value.length === 4 && /^[0-9]{4}$/.test(value)));
+}
+
+function cleanChanges(entity, input, context = {}) {
   const config = TABLES[entity];
   if (!config) return null;
   const output = {};
   for (const field of config.fields) {
     if (Object.prototype.hasOwnProperty.call(input || {}, field)) output[field] = String(input[field] || '').trim().slice(0, 500);
   }
-  if ((entity === 'brand' || entity === 'channel') && Object.prototype.hasOwnProperty.call(input || {}, 'password')) {
+  if (['brand', 'channel', 'foodstory'].includes(entity) && Object.prototype.hasOwnProperty.call(input || {}, 'password')) {
     const password = String(input.password || '');
     if (password) output.password_encrypted = encryptSecret(password);
+  }
+  if (Object.prototype.hasOwnProperty.call(input || {}, 'wongnai_pos_pin')) {
+    const allowed = entity === 'foodstory' || (entity === 'channel' && context.isFoodstoryChannel && (!Object.prototype.hasOwnProperty.call(input, 'name') || isFoodstory(input.name)));
+    if (!allowed || !validWongnaiPosPin(input.wongnai_pos_pin)) return null;
+    if (input.wongnai_pos_pin) output.wongnai_pos_pin_encrypted = encryptSecret(input.wongnai_pos_pin);
   }
   output.updated_at = new Date().toISOString();
   return output;
 }
 
-function cleanCreate(entity, input) {
-  if (entity !== 'branch' && entity !== 'brand') return null;
+function cleanCreate(entity, input, context = {}) {
+  if (!['branch', 'brand', 'channel', 'foodstory'].includes(entity)) return null;
   const config = TABLES[entity];
   const output = {};
   for (const field of config.fields) output[field] = String(input?.[field] || '').trim().slice(0, 500);
 
-  if (!output.name || !output.code) return null;
-  if (entity === 'brand') {
-    const branchId = Number(input?.branch_id);
+  const acceptsPin = entity === 'foodstory' || (entity === 'channel' && isFoodstory(output.name));
+  if (Object.prototype.hasOwnProperty.call(input || {}, 'wongnai_pos_pin') && (!acceptsPin || !validWongnaiPosPin(input.wongnai_pos_pin))) return null;
+  if (acceptsPin) output.wongnai_pos_pin_encrypted = input?.wongnai_pos_pin ? encryptSecret(input.wongnai_pos_pin) : null;
+
+  if ((entity !== 'foodstory' && !output.name) || (entity === 'branch' && !output.code)) return null;
+  if (['brand', 'channel', 'foodstory'].includes(entity)) {
+    const parentField = entity === 'channel' ? 'brand_id' : 'branch_id';
+    const parentId = Number(input?.[parentField]);
     const password = String(input?.password || '');
-    if (!Number.isSafeInteger(branchId) || branchId <= 0 || !output.login_identifier || !password) return null;
-    output.branch_id = branchId;
+    if (!Number.isSafeInteger(parentId) || parentId <= 0 || !output.login_identifier || !password) return null;
+    if (entity === 'brand') {
+      if (!BRAND_OPTIONS.some((brand) => brand.name === output.name)) return null;
+      output.code = brandCode(output.name, context.branchCode);
+      if (!output.code) return null;
+    } else if (entity === 'channel' && !CHANNEL_OPTIONS.includes(output.name)) return null;
+    output[parentField] = parentId;
     output.password_encrypted = encryptSecret(password);
   }
   output.updated_at = new Date().toISOString();
@@ -121,4 +151,5 @@ module.exports = {
   loadSnapshot,
   normalizedEmail,
   requireActiveUser,
+  validWongnaiPosPin,
 };
