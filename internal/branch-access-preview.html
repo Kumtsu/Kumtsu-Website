@@ -38,6 +38,12 @@
   </form></dialog>
   <div id="toast" class="toast" role="status" hidden></div>
   <script src="./branch-access-catalog.js"></script>
-  <script type="module" src="./branch-access.js"></script>
+  <script type="module">
+    if (HTMLScriptElement.supports?.('importmap')) {
+      import('./branch-access.js');
+    } else {
+      document.querySelector('#loadingState').textContent = 'กรุณาใช้เบราว์เซอร์เวอร์ชันใหม่เพื่อเปิดตัวอย่างนี้';
+    }
+  </script>
 </body>
 </html>
