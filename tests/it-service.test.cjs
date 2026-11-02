@@ -25,6 +25,46 @@ async function inventoryRequest(body, method = 'POST', duplicate = false) {
 
 const inventoryBody = { action: 'add-inventory', equipmentType: 'มือถือ', brand: 'Samsung', model: 'A06', quantity: 1, branch: 'สำนักงานใหญ่', storageLocation: '', isInStock: true };
 
+function assetNumberContext() {
+  const source = fs.readFileSync(require.resolve('../internal/it-service.js'), 'utf8');
+  const nodes = { inventoryId: { value: '' }, inventoryAssetNumber: { value: '' }, inventoryQuantity: { value: '1' } };
+  const context = vm.createContext({ Intl, Date, $: id => nodes[id], state: { items: [] } });
+  vm.runInContext(source.slice(source.indexOf('function suggestAssetNumbers('), source.indexOf('function syncInventoryStorage(')), context);
+  return { context, nodes };
+}
+
+test('asset suggestions use Bangkok day/month/Gregorian year and daily sequences', () => {
+  const { context } = assetNumberContext();
+  const day = new Date('2026-11-02T00:00:00+07:00');
+  assert.equal(context.suggestAssetNumbers([], 1, day), '02112026-001');
+  const items = [{ asset_number: 'KS-25-01-000021' }, { asset_number: '02112026-003' }, { asset_number: '01112026-999' }];
+  const snapshot = JSON.stringify(items);
+  assert.equal(context.suggestAssetNumbers(items, 2, day), '02112026-004, 02112026-005');
+  assert.equal(context.suggestAssetNumbers(items, 1, new Date('2026-11-02T17:00:00Z')), '03112026-001');
+  assert.equal(JSON.stringify(items), snapshot);
+});
+
+test('asset suggestions preserve manual edits, empty values, and existing record codes', () => {
+  const { context, nodes } = assetNumberContext();
+  nodes.inventoryAssetNumber.value = 'MY-CODE';
+  vm.runInContext('automaticAssetNumbers=false;updateSuggestedAssetNumbers()', context);
+  assert.equal(nodes.inventoryAssetNumber.value, 'MY-CODE');
+  nodes.inventoryAssetNumber.value = '';
+  vm.runInContext('updateSuggestedAssetNumbers()', context);
+  assert.equal(nodes.inventoryAssetNumber.value, '');
+  nodes.inventoryId.value = '1';
+  nodes.inventoryAssetNumber.value = 'KS-25-01-000021';
+  vm.runInContext('automaticAssetNumbers=true;updateSuggestedAssetNumbers()', context);
+  assert.equal(nodes.inventoryAssetNumber.value, 'KS-25-01-000021');
+});
+
+test('inventory saves manually edited codes or no code exactly as submitted', async () => {
+  const edited = await inventoryRequest({ ...inventoryBody, assetNumbers: ['MY-CODE'] });
+  assert.equal(edited.saved[0].asset_number, 'MY-CODE');
+  const cleared = await inventoryRequest({ ...inventoryBody, assetNumbers: [] });
+  assert.equal(cleared.saved[0].asset_number, null);
+});
+
 test('warehouse inventory can be added without an assigned holder', async () => {
   const result = await inventoryRequest(inventoryBody);
   assert.equal(result.status, 201);
