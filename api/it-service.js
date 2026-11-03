@@ -11,6 +11,22 @@ const ISSUE_SELECT = 'id,job_id,inventory_item_id,destination_inventory_item_id,
 const email = (value) => String(value || '').trim().toLowerCase();
 const text = (value, max = 4000) => String(value || '').trim().slice(0, max);
 
+function normalizeIssueItems(raw) {
+  const invalid = () => Object.assign(new Error('กรุณาเลือกอุปกรณ์และจำนวนให้ถูกต้อง (สูงสุด 100 รายการ)'), { statusCode: 400 });
+  if (!Array.isArray(raw) || !raw.length || raw.length > 100) throw invalid();
+  const combined = new Map();
+  for (const item of raw) {
+    const inventoryItemId = Number(item?.inventoryItemId), quantity = Number(item?.quantity);
+    if (!Number.isSafeInteger(inventoryItemId) || inventoryItemId < 1 || !Number.isSafeInteger(quantity) || quantity < 1 || quantity > 2147483647) throw invalid();
+    const total = (combined.get(inventoryItemId) || 0) + quantity;
+    if (total > 2147483647) throw invalid();
+    combined.set(inventoryItemId, total);
+  }
+  return [...combined].map(([inventoryItemId, quantity]) => ({ inventoryItemId, quantity }));
+}
+
+const issueRpcItems = items => items.map(x => ({ inventory_item_id: x.inventoryItemId, quantity: x.quantity }));
+
 async function activeProfile(auth) {
   const result = await serviceSupabase(`/rest/v1/internal_profiles?user_id=eq.${encodeURIComponent(auth.user.id)}&select=user_id,employee_id,first_name,last_name,email,status`);
   return result.response.ok ? result.data?.[0] : null;
@@ -92,8 +108,14 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === 'POST' && action === 'issue-stock') {
-      const jobId = Number(body.jobId); const inventoryItemId = Number(body.inventoryItemId); const quantity = Number(body.quantity);
-      if (![jobId, inventoryItemId, quantity].every(Number.isSafeInteger) || quantity < 1) return send(res, 400, { message: 'ข้อมูลตัดสต๊อกไม่ถูกต้อง' });
+      const jobId = Number(body.jobId);
+      if (!Number.isSafeInteger(jobId) || jobId < 1) return send(res, 400, { message: 'ข้อมูลตัดสต๊อกไม่ถูกต้อง' });
+      const items = normalizeIssueItems(body.items === undefined ? [{ inventoryItemId: body.inventoryItemId, quantity: body.quantity }] : body.items);
+      if (body.items !== undefined) {
+        const result = await db('/rest/v1/rpc/issue_it_inventory_batch', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ p_job_id: jobId, p_items: issueRpcItems(items), p_actor_email: actor }) });
+        return send(res, 200, { message: 'ตัดสต๊อกและโอนอุปกรณ์ทุกรายการเรียบร้อยแล้ว', ...result });
+      }
+      const { inventoryItemId, quantity } = items[0];
       const issue = await db('/rest/v1/rpc/issue_it_inventory', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ p_job_id: jobId, p_inventory_item_id: inventoryItemId, p_quantity: quantity, p_actor_email: actor }) });
       return send(res, 200, { message: 'ตัดสต๊อกและโอนอุปกรณ์ไปยังสาขาของงานเรียบร้อยแล้ว', issue });
     }
@@ -126,6 +148,11 @@ module.exports = async function handler(req, res) {
       if (!Number.isSafeInteger(id) || !STATUSES.has(status) || !assignedTo.length || !/^\d{4}-\d{2}-\d{2}$/.test(requestDate) || !POSITIONS.has(position) || !branch || !issueType || !description || (scheduledDate && !/^\d{4}-\d{2}-\d{2}$/.test(scheduledDate))) return send(res, 400, { message: 'กรุณากรอกข้อมูลงานและผู้รับผิดชอบให้ครบถ้วน' });
       const patch = { request_date: requestDate, position, branch, issue_type: issueType, description, status, assigned_to: assignedTo, scheduled_date: scheduledDate, updated_at: new Date().toISOString() };
       if (status === 'completed') { patch.closed_at = new Date().toISOString(); patch.closed_by_email = actor; }
+      if (body.inventoryItems !== undefined) {
+        const items = normalizeIssueItems(body.inventoryItems);
+        const result = await db('/rest/v1/rpc/issue_it_inventory_batch', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ p_job_id: id, p_items: issueRpcItems(items), p_actor_email: actor, p_job_patch: patch }) });
+        return send(res, 200, { message: status === 'completed' ? 'ปิดงานและตัดสต๊อกทุกรายการเรียบร้อยแล้ว' : 'อัปเดตงานและตัดสต๊อกทุกรายการเรียบร้อยแล้ว', ...result });
+      }
       const result = await db(`/rest/v1/it_jobs?id=eq.${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Prefer: 'return=representation' }, body: JSON.stringify(patch) });
       if (!result[0]) return send(res, 404, { message: 'ไม่พบงาน' });
       await audit(id, 'job_updated', { request_date: requestDate, position, branch, issue_type: issueType, description, status, assigned_to: assignedTo, scheduled_date: scheduledDate }, actor);
@@ -160,10 +187,14 @@ module.exports = async function handler(req, res) {
 
     return send(res, 400, { message: 'ไม่รองรับคำสั่งนี้' });
   } catch (error) {
+    if (error.statusCode === 400) return send(res, 400, { message: error.message });
+    if (error.message === 'Job not found') return send(res, 404, { message: 'ไม่พบงาน' });
+    if (error.message === 'Insufficient inventory') return send(res, 400, { message: 'มีอุปกรณ์คงเหลือไม่พอหรือไม่ได้อยู่ในคลัง กรุณาตรวจสอบทุกรายการ ชุดนี้ยังไม่ได้ตัดสต๊อก' });
+    if (error.message === 'Serialized inventory must be transferred as a whole item') return send(res, 400, { message: 'อุปกรณ์ที่มีซีเรียลหรือ Asset No. ต้องโอนเต็มจำนวนของรายการ ชุดนี้ยังไม่ได้ตัดสต๊อก' });
     if (error.code === '23505') return send(res, 409, { message: 'ซีเรียลนัมเบอร์หรือรหัสอุปกรณ์นี้มีอยู่แล้ว กรุณาตรวจสอบรายการเดิมก่อนบันทึก' });
     console.error('[it-service]', error);
     return send(res, 503, { message: 'ระบบงานไอทีขัดข้องชั่วคราว' });
   }
 };
 
-module.exports._test = { email, text, EQUIPMENT_TYPES, POSITIONS, STATUSES, ITEM_SELECT, ISSUE_SELECT };
+module.exports._test = { email, text, EQUIPMENT_TYPES, POSITIONS, STATUSES, ITEM_SELECT, ISSUE_SELECT, normalizeIssueItems };

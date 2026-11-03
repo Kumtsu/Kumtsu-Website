@@ -54,7 +54,34 @@ function renderBranches(){
 function applyPermissions(){document.querySelectorAll('.admin-only').forEach(x=>x.hidden=!state.permissions.canManage)}
 async function load(){const {response,data}=await boundedApi('/api/it-service');if(!response.ok)throw new Error(data.message||'โหลดข้อมูลไม่สำเร็จ');state=data;$('viewerName').textContent=`${data.profile.first_name} ${data.profile.last_name}`;$('viewerRole').textContent=data.permissions.canManage?'ผู้ดูแลระบบไอที':data.profile.email;renderJobs();renderInventory();renderBranches();if($('branchDialog').open)renderBranchDevices($('branchTitle').textContent);applyPermissions()}
 
-function openJob(id){selectedJob=state.jobs.find(x=>x.id===Number(id));if(!selectedJob)return;$('detailNumber').textContent=`${jobNo(id)} · ${STATUS[selectedJob.status]}`;$('jobDetails').innerHTML=[['ผู้แจ้ง',`${selectedJob.requester_name} · ${selectedJob.requester_email}`],['ตำแหน่ง',selectedJob.position],['สาขา',selectedJob.branch],['วันที่แจ้ง',thDate(selectedJob.request_date)],['หัวข้อ',selectedJob.issue_type],['รายละเอียด',selectedJob.description]].map(([a,b])=>`<div><dt>${a}</dt><dd>${esc(b)}</dd></div>`).join('');$('editRequestDate').value=selectedJob.request_date;$('editPosition').value=selectedJob.position;$('editBranch').value=selectedJob.branch;$('editIssueType').value=selectedJob.issue_type;$('editDescription').value=selectedJob.description;document.querySelectorAll('[name=assignee]').forEach(x=>x.checked=(selectedJob.assigned_to||[]).includes(x.value));$('editStatus').value=selectedJob.status;$('scheduledDate').value=selectedJob.scheduled_date||'';$('issueItem').innerHTML='<option value="">เลือกอุปกรณ์</option>'+state.items.filter(x=>x.branch===HEAD_OFFICE&&x.is_in_stock===true&&x.status==='available'&&x.quantity>0).map(x=>`<option value="${x.id}">${esc(x.equipment_type)} · Asset ${esc(x.asset_number||'—')} · ${esc(x.brand)} ${esc(x.model)} ${esc(x.serial_number||'')} · ${esc(x.branch)} — คงเหลือ ${x.quantity}</option>`).join('');const issues=state.issues.filter(x=>x.job_id===selectedJob.id);$('jobIssues').innerHTML=issues.length?issues.map(x=>{const i=state.items.find(y=>y.id===(x.destination_inventory_item_id||x.inventory_item_id));return `<p>${esc(i?.equipment_type||'อุปกรณ์')} · Asset ${esc(i?.asset_number||'—')} · ${esc(i?.brand||'')} ${esc(i?.model||'')} · S/N ${esc(i?.serial_number||'—')} × ${x.quantity} · โอนไป ${esc(selectedJob.branch)} · ผู้ครอบครอง ${esc(selectedJob.requester_name)}${x.old_device_status==='pending_return'?' · <b>เครื่องเก่ายังไม่ได้รับคืน</b>':''}</p>`}).join(''):'<p>ยังไม่มีการตัดสต๊อก</p>';$('receiptButton').hidden=!(selectedJob.status==='completed'&&issues.length);applyPermissions();$('detailDialog').showModal()}
+function openJob(id){selectedJob=state.jobs.find(x=>x.id===Number(id));if(!selectedJob)return;$('detailNumber').textContent=`${jobNo(id)} · ${STATUS[selectedJob.status]}`;$('jobDetails').innerHTML=[['ผู้แจ้ง',`${selectedJob.requester_name} · ${selectedJob.requester_email}`],['ตำแหน่ง',selectedJob.position],['สาขา',selectedJob.branch],['วันที่แจ้ง',thDate(selectedJob.request_date)],['หัวข้อ',selectedJob.issue_type],['รายละเอียด',selectedJob.description]].map(([a,b])=>`<div><dt>${a}</dt><dd>${esc(b)}</dd></div>`).join('');$('editRequestDate').value=selectedJob.request_date;$('editPosition').value=selectedJob.position;$('editBranch').value=selectedJob.branch;$('editIssueType').value=selectedJob.issue_type;$('editDescription').value=selectedJob.description;document.querySelectorAll('[name=assignee]').forEach(x=>x.checked=(selectedJob.assigned_to||[]).includes(x.value));$('editStatus').value=selectedJob.status;$('scheduledDate').value=selectedJob.scheduled_date||'';$('stockIssueRows').innerHTML='';addStockIssueRow();$('stockIssueError').hidden=true;const issues=state.issues.filter(x=>x.job_id===selectedJob.id);$('jobIssues').innerHTML=issues.length?issues.map(x=>{const i=state.items.find(y=>y.id===(x.destination_inventory_item_id||x.inventory_item_id));return `<p>${esc(i?.equipment_type||'อุปกรณ์')} · Asset ${esc(i?.asset_number||'—')} · ${esc(i?.brand||'')} ${esc(i?.model||'')} · S/N ${esc(i?.serial_number||'—')} × ${x.quantity} · โอนไป ${esc(selectedJob.branch)} · ผู้ครอบครอง ${esc(selectedJob.requester_name)}${x.old_device_status==='pending_return'?' · <b>เครื่องเก่ายังไม่ได้รับคืน</b>':''}</p>`}).join(''):'<p>ยังไม่มีการตัดสต๊อก</p>';$('receiptButton').hidden=!(selectedJob.status==='completed'&&issues.length);applyPermissions();$('detailDialog').showModal()}
+function addStockIssueRow(){
+  if($('stockIssueRows').children.length>=100)return;
+  const row=document.createElement('div');row.className='stock-issue-row';
+  row.innerHTML='<label>อุปกรณ์<select class="issue-item"><option value="">เลือกอุปกรณ์จากคลังสำนักงานใหญ่</option>'+state.items.filter(x=>x.branch===HEAD_OFFICE&&x.is_in_stock===true&&x.status==='available'&&x.quantity>0).map(x=>`<option value="${x.id}">${esc(x.equipment_type)} · ${esc(x.brand)} ${esc(x.model)} · Asset ${esc(x.asset_number||'—')} · S/N ${esc(x.serial_number||'—')} — คงเหลือ ${x.quantity}</option>`).join('')+'</select></label><label>จำนวน<input class="issue-quantity" type="number" min="1" step="1" value="1"></label><button type="button" class="link danger-link" data-remove-stock-row aria-label="ลบแถวอุปกรณ์ที่เลือก">นำออก</button>';
+  $('stockIssueRows').appendChild(row);
+}
+function readStockIssueItems(){
+  const combined=new Map();
+  for(const row of $('stockIssueRows').children){
+    const value=row.querySelector('.issue-item').value;if(!value)continue;
+    const inventoryItemId=Number(value),quantity=Number(row.querySelector('.issue-quantity').value);
+    if(!Number.isSafeInteger(quantity)||quantity<1)throw new Error('กรุณาระบุจำนวนเต็มตั้งแต่ 1 ขึ้นไปในแต่ละรายการ');
+    combined.set(inventoryItemId,(combined.get(inventoryItemId)||0)+quantity);
+  }
+  const items=[...combined].map(([inventoryItemId,quantity])=>({inventoryItemId,quantity}));
+  for(const row of items){
+    const item=state.items.find(x=>x.id===row.inventoryItemId);
+    if(!item||row.quantity>item.quantity)throw new Error('จำนวนที่เลือกเกินสต๊อกคงเหลือ กรุณาตรวจสอบรายการ');
+    if((item.asset_number||item.serial_number)&&row.quantity!==item.quantity)throw new Error('อุปกรณ์ที่มี Asset No. หรือซีเรียลต้องโอนเต็มจำนวนของรายการ');
+  }
+  return items;
+}
+function setStockIssueBusy(busy){
+  $('saveJobEdit').disabled=busy;$('issueStock').disabled=busy;$('addStockIssueRow').disabled=busy;$('deleteJob').disabled=busy;
+  $('stockIssueRows').querySelectorAll('select,input,button').forEach(x=>x.disabled=busy);
+}
+function stockIssueError(error){$('stockIssueError').textContent=error.message;$('stockIssueError').hidden=false;showToast(error.message,'error')}
 function suggestAssetNumbers(items,quantity=1,date=new Date()){
   const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Bangkok',calendar:'gregory',numberingSystem:'latn',day:'2-digit',month:'2-digit',year:'numeric'}).formatToParts(date),part=type=>parts.find(x=>x.type===type).value;
   const datePrefix=part('day')+part('month')+part('year'),prefix='ks-'+datePrefix,pattern=new RegExp('^(?:ks-)?'+datePrefix+'-([0-9]{3,})$','i');
@@ -95,9 +122,31 @@ $('inventoryStockState').onchange=syncInventoryStorage;
 $('inventoryAssetNumber').addEventListener('input',()=>{automaticAssetNumbers=false});
 $('inventoryQuantity').addEventListener('input',updateSuggestedAssetNumbers);
 $('inventoryForm').onsubmit=async e=>{if(e.submitter?.value==='cancel')return;e.preventDefault();if($('saveInventory').disabled)return;$('saveInventory').disabled=true;$('saveInventory').textContent='กำลังบันทึก…';$('inventoryError').hidden=true;const base={equipmentType:$('inventoryType').value,brand:$('inventoryBrand').value,model:$('inventoryModel').value,quantity:Number($('inventoryQuantity').value),minimumQuantity:Number($('inventoryMinimum').value),branch:$('inventoryBranch').value,storageLocation:$('inventoryLocation').value,holderPosition:$('inventoryHolderPosition').value,isInStock:$('inventoryStockState').value==='in_stock',note:$('inventoryNote').value};try{const id=Number($('inventoryId').value);if(id)await request('PATCH',{action:'edit-inventory',id,...base,serialNumber:$('inventorySerial').value,assetNumber:$('inventoryAssetNumber').value});else await request('POST',{action:'add-inventory',...base,serialNumbers:$('inventorySerial').value.split(',').map(x=>x.trim()).filter(Boolean),assetNumbers:$('inventoryAssetNumber').value.split(',').map(x=>x.trim()).filter(Boolean)});$('inventoryDialog').close()}catch(x){$('inventoryError').textContent=x.message;$('inventoryError').hidden=false;showToast(x.message,'error')}finally{$('saveInventory').disabled=false;$('saveInventory').textContent='บันทึก'}};
-$('saveJobEdit').onclick=async()=>{try{const jobId=selectedJob.id,inventoryItemId=Number($('issueItem').value),quantity=Number($('issueQuantity').value);if($('editStatus').value==='completed'&&inventoryItemId)await request('POST',{action:'issue-stock',jobId,inventoryItemId,quantity});await request('PATCH',{action:'update-job',id:jobId,requestDate:$('editRequestDate').value,position:$('editPosition').value,branch:$('editBranch').value,issueType:$('editIssueType').value,description:$('editDescription').value,status:$('editStatus').value,scheduledDate:$('scheduledDate').value||null,assignedTo:[...document.querySelectorAll('[name=assignee]:checked')].map(x=>x.value)});$('detailDialog').close();openJob(jobId)}catch(x){showToast(x.message,'error')}};
-$('deleteJob').onclick=async()=>{if(!selectedJob||!confirm(`ยืนยันลบงาน ${jobNo(selectedJob.id)}?\n\nหากงานนี้เคยตัดสต๊อก ระบบจะคืนจำนวนอุปกรณ์เข้าสต๊อกให้อัตโนมัติ`))return;try{await request('DELETE',{action:'delete-job',id:selectedJob.id});$('detailDialog').close();selectedJob=null}catch(x){showToast(x.message,'error')}};
-$('issueStock').onclick=async()=>{try{await request('POST',{action:'issue-stock',jobId:selectedJob.id,inventoryItemId:Number($('issueItem').value),quantity:Number($('issueQuantity').value)});$('detailDialog').close();openJob(selectedJob.id)}catch(x){showToast(x.message,'error')}};
+$('saveJobEdit').onclick=async()=>{
+  if($('saveJobEdit').disabled)return;
+  $('stockIssueError').hidden=true;
+  try{
+    const jobId=selectedJob.id,status=$('editStatus').value;
+    const items=status==='completed'?readStockIssueItems():[];
+    setStockIssueBusy(true);
+    await request('PATCH',{action:'update-job',id:jobId,requestDate:$('editRequestDate').value,position:$('editPosition').value,branch:$('editBranch').value,issueType:$('editIssueType').value,description:$('editDescription').value,status,scheduledDate:$('scheduledDate').value||null,assignedTo:[...document.querySelectorAll('[name=assignee]:checked')].map(x=>x.value),...(items.length?{inventoryItems:items}:{})});
+    $('detailDialog').close();openJob(jobId);
+  }catch(error){stockIssueError(error)}finally{setStockIssueBusy(false)}
+};
+$('deleteJob').onclick=async()=>{if(!selectedJob||$('deleteJob').disabled||!confirm(`ยืนยันลบงาน ${jobNo(selectedJob.id)}?\n\nหากงานนี้เคยตัดสต๊อก ระบบจะคืนจำนวนอุปกรณ์เข้าสต๊อกให้อัตโนมัติ`))return;try{await request('DELETE',{action:'delete-job',id:selectedJob.id});$('detailDialog').close();selectedJob=null}catch(x){showToast(x.message,'error')}};
+$('addStockIssueRow').onclick=addStockIssueRow;
+$('stockIssueRows').addEventListener('click',event=>{const button=event.target.closest('[data-remove-stock-row]');if(button){button.closest('.stock-issue-row').remove();if(!$('stockIssueRows').children.length)addStockIssueRow()}});
+$('issueStock').onclick=async()=>{
+  if($('issueStock').disabled)return;
+  $('stockIssueError').hidden=true;
+  try{
+    const jobId=selectedJob.id,items=readStockIssueItems();
+    if(!items.length)throw new Error('กรุณาเลือกอุปกรณ์อย่างน้อย 1 รายการ');
+    setStockIssueBusy(true);
+    await request('POST',{action:'issue-stock',jobId,items});
+    $('detailDialog').close();openJob(jobId);
+  }catch(error){stockIssueError(error)}finally{setStockIssueBusy(false)}
+};
 document.addEventListener('click',async e=>{const job=e.target.closest('[data-job]'),edit=e.target.closest('[data-edit-item]'),del=e.target.closest('[data-delete-item]'),branch=e.target.closest('[data-branch]'),addBranch=e.target.closest('[data-add-branch]'),repair=e.target.closest('[data-repair-item]');if(job)openJob(job.dataset.job);if(edit)editItem(edit.dataset.editItem);if(branch)openBranch(branch.dataset.branch);if(addBranch)openInventoryForBranch(addBranch.dataset.addBranch);if(del&&confirm('ยืนยันลบรายการอุปกรณ์นี้?\n\nเมื่อลบแล้วจะไม่สามารถเรียกคืนข้อมูลได้'))try{const branchName=$('branchDialog').open?$('branchTitle').textContent:'';await request('DELETE',{action:'delete-inventory',id:Number(del.dataset.deleteItem)});if(branchName)renderBranchDevices(branchName)}catch(x){showToast(x.message,'error')}if(repair)try{await request('POST',{action:'complete-repair',inventoryItemId:Number(repair.dataset.repairItem)})}catch(x){showToast(x.message,'error')}});
 $('closeBranch').onclick=()=>$('branchDialog').close();$('printBranchInventory').onclick=()=>showBranchReport();$('closeBranchReport').onclick=()=>$('branchReportDialog').close();$('printBranchReport').onclick=()=>printDocument('branch-report');$('workOrderButton').onclick=showWorkOrder;$('closeWorkOrder').onclick=()=>$('workOrderDialog').close();$('printWorkOrder').onclick=()=>printDocument('work-order');$('receiptButton').onclick=showReceipt;$('closeReceipt').onclick=()=>$('receiptDialog').close();$('printReceipt').onclick=()=>printDocument('receipt');window.addEventListener('afterprint',()=>delete document.body.dataset.printTarget);$('logout').onclick=()=>{clearSession();location.replace('./login.html')};
 document.addEventListener('click',event=>{const button=event.target.closest('[data-print-item]');if(button)showBranchReport(Number(button.dataset.printItem))});

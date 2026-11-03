@@ -161,6 +161,61 @@ begin
 end;
 $$;
 
+-- Batch transfers are atomic; existing single-item transfers and their history are retained.
+create or replace function public.issue_it_inventory_batch(
+  p_job_id bigint, p_items jsonb, p_actor_email text, p_job_patch jsonb default null
+) returns jsonb
+language plpgsql security invoker set search_path = public
+as $$
+declare
+  v_job public.it_jobs;
+  v_row record;
+  v_issue public.it_job_inventory_issues;
+  v_issues jsonb := '[]'::jsonb;
+begin
+  if p_items is null or jsonb_typeof(p_items) <> 'array' then raise exception 'Invalid inventory batch'; end if;
+  if jsonb_array_length(p_items) < 1 or jsonb_array_length(p_items) > 100 then raise exception 'Invalid inventory batch'; end if;
+  if exists(select 1 from jsonb_array_elements(p_items) x
+    where jsonb_typeof(x) is distinct from 'object'
+      or jsonb_typeof(x->'inventory_item_id') is distinct from 'number'
+      or jsonb_typeof(x->'quantity') is distinct from 'number'
+      or coalesce(x->>'inventory_item_id','') !~ '^[1-9][0-9]*$'
+      or coalesce(x->>'quantity','') !~ '^[1-9][0-9]*$') then raise exception 'Invalid inventory batch'; end if;
+  select * into v_job from public.it_jobs where id=p_job_id for update;
+  if not found then raise exception 'Job not found'; end if;
+  -- All batches acquire inventory locks in the same order, before issuing any item.
+  perform 1 from public.it_inventory_items
+    where id in (select x.inventory_item_id from jsonb_to_recordset(p_items) as x(inventory_item_id bigint,quantity integer))
+    order by id for update;
+  if p_job_patch is not null then
+    update public.it_jobs set
+      request_date=(p_job_patch->>'request_date')::date,
+      position=p_job_patch->>'position', branch=p_job_patch->>'branch',
+      issue_type=p_job_patch->>'issue_type', description=p_job_patch->>'description',
+      status=p_job_patch->>'status',
+      assigned_to=array(select jsonb_array_elements_text(p_job_patch->'assigned_to')),
+      scheduled_date=(p_job_patch->>'scheduled_date')::date,
+      closed_at=case when p_job_patch->>'status'='completed' then now() else closed_at end,
+      closed_by_email=case when p_job_patch->>'status'='completed' then p_actor_email else closed_by_email end,
+      updated_at=now()
+    where id=p_job_id returning * into v_job;
+    insert into public.it_job_history(job_id,action,details,changed_by_email)
+      values(p_job_id,'job_updated',p_job_patch,p_actor_email);
+  end if;
+  for v_row in
+    select x.inventory_item_id,sum(x.quantity)::integer as quantity
+    from jsonb_to_recordset(p_items) as x(inventory_item_id bigint,quantity integer)
+    group by x.inventory_item_id order by x.inventory_item_id
+  loop
+    select * into v_issue from public.issue_it_inventory(p_job_id,v_row.inventory_item_id,v_row.quantity,p_actor_email);
+    v_issues := v_issues || jsonb_build_array(to_jsonb(v_issue));
+  end loop;
+  return jsonb_build_object('job',to_jsonb(v_job),'issues',v_issues);
+end;
+$$;
+revoke execute on function public.issue_it_inventory_batch(bigint,jsonb,text,jsonb) from public, anon, authenticated;
+grant execute on function public.issue_it_inventory_batch(bigint,jsonb,text,jsonb) to service_role;
+
 create or replace function public.complete_it_repair(
   p_inventory_item_id bigint, p_actor_email text
 ) returns public.it_inventory_items

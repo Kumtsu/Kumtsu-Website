@@ -4,15 +4,20 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const { _test } = require('../api/it-service');
 
-async function inventoryRequest(body, method = 'POST', duplicate = false) {
+async function inventoryRequest(body, method = 'POST', duplicate = false, configuration = {}) {
   let saved;
+  const calls = [];
+  const actor = configuration.actor || 'pachara.r@kumtsu.com';
   const auth = {
-    currentUser: async () => ({ user: { id: 'test-user', email: 'pachara.r@kumtsu.com' } }),
+    currentUser: async () => ({ user: { id: 'test-user', email: actor } }),
     readJson: async req => req.body,
     send: (res, status, data) => Object.assign(res, { status, data }),
     serviceSupabase: async (path, options = {}) => {
-      if (path.includes('internal_profiles')) return { response: { ok: true }, data: [{ status: 'active', email: 'pachara.r@kumtsu.com' }] };
+      if (path.includes('internal_profiles')) return { response: { ok: true }, data: [{ status: 'active', email: actor }] };
       saved = JSON.parse(options.body);
+      calls.push({ path, method: options.method, body: saved });
+      if (path.endsWith('/rpc/issue_it_inventory_batch')) return { response: { ok: true }, data: { job: { id: saved.p_job_id, ...(saved.p_job_patch || {}) }, issues: saved.p_items.map((item, index) => ({ id: index + 1, job_id: saved.p_job_id, ...item })) } };
+      if (path.endsWith('/rpc/issue_it_inventory')) return { response: { ok: true }, data: { id: 1, job_id: saved.p_job_id, inventory_item_id: saved.p_inventory_item_id, quantity: saved.p_quantity } };
       return duplicate ? { response: { ok: false }, data: { code: '23505', message: 'duplicate key' } } : { response: { ok: true }, data: [saved] };
     },
   };
@@ -20,10 +25,87 @@ async function inventoryRequest(body, method = 'POST', duplicate = false) {
   vm.runInContext(fs.readFileSync(require.resolve('../api/it-service'), 'utf8'), context);
   const res = { setHeader() {} };
   await context.module.exports({ method, body }, res);
-  return { ...res, saved };
+  return { ...res, saved, calls };
 }
 
 const inventoryBody = { action: 'add-inventory', equipmentType: 'มือถือ', brand: 'Samsung', model: 'A06', quantity: 1, branch: 'สำนักงานใหญ่', storageLocation: '', isInStock: true };
+
+const jobUpdateBody = { action: 'update-job', id: 7, requestDate: '2026-11-03', position: 'IT', branch: 'สาขาใหม่', issueType: 'Notebook', description: 'ส่งอุปกรณ์หลายรายการ', status: 'completed', assignedTo: ['pachara.r@kumtsu.com'], scheduledDate: '2026-11-04' };
+
+test('multiple equipment items are issued through a single atomic batch RPC', async () => {
+  const result = await inventoryRequest({ action: 'issue-stock', jobId: 7, items: [{ inventoryItemId: 4, quantity: 1 }, { inventoryItemId: 9, quantity: 2 }] });
+  assert.equal(result.status, 200);
+  assert.equal(result.calls.length, 1);
+  assert.equal(result.calls[0].path, '/rest/v1/rpc/issue_it_inventory_batch');
+  assert.deepEqual(result.saved.p_items, [{ inventory_item_id: 4, quantity: 1 }, { inventory_item_id: 9, quantity: 2 }]);
+  assert.equal(result.saved.p_job_id, 7);
+  assert.equal(result.saved.p_actor_email, 'pachara.r@kumtsu.com');
+  assert.equal(result.data.issues.length, 2);
+});
+
+test('duplicate equipment selections are combined before the atomic batch RPC', async () => {
+  const result = await inventoryRequest({ action: 'issue-stock', jobId: 7, items: [{ inventoryItemId: 4, quantity: 1 }, { inventoryItemId: 9, quantity: 2 }, { inventoryItemId: 4, quantity: 3 }] });
+  assert.equal(result.status, 200);
+  assert.equal(result.calls.length, 1);
+  assert.deepEqual(result.saved.p_items, [{ inventory_item_id: 4, quantity: 4 }, { inventory_item_id: 9, quantity: 2 }]);
+});
+
+test('legacy single-equipment issue requests retain their original RPC', async () => {
+  const result = await inventoryRequest({ action: 'issue-stock', jobId: 7, inventoryItemId: 4, quantity: 2 });
+  assert.equal(result.status, 200);
+  assert.equal(result.calls.length, 1);
+  assert.equal(result.calls[0].path, '/rest/v1/rpc/issue_it_inventory');
+  assert.deepEqual(result.saved, { p_job_id: 7, p_inventory_item_id: 4, p_quantity: 2, p_actor_email: 'pachara.r@kumtsu.com' });
+});
+
+test('invalid batch equipment payloads are rejected before any stock is changed', async () => {
+  for (const items of [[], null, {}, [null], [{}], [{ inventoryItemId: 0, quantity: 1 }], [{ inventoryItemId: -1, quantity: 1 }], [{ inventoryItemId: 1.5, quantity: 1 }], [{ inventoryItemId: 1, quantity: 0 }], [{ inventoryItemId: 1, quantity: -1 }], [{ inventoryItemId: 1, quantity: 1.5 }], [{ inventoryItemId: 1, quantity: Number.MAX_SAFE_INTEGER + 1 }], Array.from({ length: 101 }, () => ({ inventoryItemId: 1, quantity: 1 }))]) {
+    const result = await inventoryRequest({ action: 'issue-stock', jobId: 7, items });
+    assert.equal(result.status, 400, JSON.stringify(items));
+    assert.equal(result.calls.length, 0, 'invalid data must not reach the database');
+  }
+});
+
+test('the batch normalizer bounds inputs and rejects combined quantity overflow', () => {
+  assert.deepEqual(_test.normalizeIssueItems([{ inventoryItemId: 4, quantity: 1 }, { inventoryItemId: 4, quantity: 2 }]), [{ inventoryItemId: 4, quantity: 3 }]);
+  const atLimit = _test.normalizeIssueItems(Array.from({ length: 100 }, () => ({ inventoryItemId: 1, quantity: 1 })));
+  assert.deepEqual(atLimit, [{ inventoryItemId: 1, quantity: 100 }]);
+  for (const items of [[], [{ inventoryItemId: 1, quantity: 2147483647 }, { inventoryItemId: 1, quantity: 1 }]]) {
+    assert.throws(() => _test.normalizeIssueItems(items), error => error.statusCode === 400);
+  }
+});
+
+test('closing a job with multiple items sends the changed job fields and items atomically', async () => {
+  const result = await inventoryRequest({ ...jobUpdateBody, inventoryItems: [{ inventoryItemId: 4, quantity: 1 }, { inventoryItemId: 9, quantity: 2 }] }, 'PATCH');
+  assert.equal(result.status, 200);
+  assert.equal(result.calls.length, 1, 'job update and stock transfer must share a single RPC');
+  assert.equal(result.calls[0].path, '/rest/v1/rpc/issue_it_inventory_batch');
+  assert.equal(result.saved.p_job_id, 7);
+  assert.deepEqual(result.saved.p_items, [{ inventory_item_id: 4, quantity: 1 }, { inventory_item_id: 9, quantity: 2 }]);
+  assert.equal(result.saved.p_job_patch.branch, 'สาขาใหม่');
+  assert.equal(result.saved.p_job_patch.position, 'IT');
+  assert.equal(result.saved.p_job_patch.status, 'completed');
+  assert.equal(result.saved.p_job_patch.request_date, '2026-11-03');
+  assert.deepEqual(result.saved.p_job_patch.assigned_to, ['pachara.r@kumtsu.com']);
+  assert.equal(result.data.job.branch, 'สาขาใหม่');
+  assert.equal(result.data.issues.length, 2);
+});
+
+test('invalid job fields or empty closing batches cannot cause a stock transfer', async () => {
+  for (const body of [{ ...jobUpdateBody, description: '', inventoryItems: [{ inventoryItemId: 4, quantity: 1 }] }, { ...jobUpdateBody, inventoryItems: [] }, { ...jobUpdateBody, inventoryItems: [{ inventoryItemId: 4, quantity: 0 }] }]) {
+    const result = await inventoryRequest(body, 'PATCH');
+    assert.equal(result.status, 400);
+    assert.equal(result.calls.length, 0);
+  }
+});
+
+test('only IT managers may issue batches or close jobs with equipment', async () => {
+  for (const [body, method] of [[{ action: 'issue-stock', jobId: 7, items: [{ inventoryItemId: 4, quantity: 1 }] }, 'POST'], [{ ...jobUpdateBody, inventoryItems: [{ inventoryItemId: 4, quantity: 1 }] }, 'PATCH']]) {
+    const result = await inventoryRequest(body, method, false, { actor: 'employee@kumtsu.com' });
+    assert.equal(result.status, 403);
+    assert.equal(result.calls.length, 0);
+  }
+});
 
 function assetNumberContext() {
   const source = fs.readFileSync(require.resolve('../internal/it-service.js'), 'utf8');
