@@ -36,11 +36,12 @@ function assetNumberContext() {
 test('asset suggestions use Bangkok day/month/Gregorian year and daily sequences', () => {
   const { context } = assetNumberContext();
   const day = new Date('2026-11-02T00:00:00+07:00');
-  assert.equal(context.suggestAssetNumbers([], 1, day), '02112026-001');
+  assert.equal(context.suggestAssetNumbers([], 1, day), 'ks-02112026-001');
   const items = [{ asset_number: 'KS-25-01-000021' }, { asset_number: '02112026-003' }, { asset_number: '01112026-999' }];
   const snapshot = JSON.stringify(items);
-  assert.equal(context.suggestAssetNumbers(items, 2, day), '02112026-004, 02112026-005');
-  assert.equal(context.suggestAssetNumbers(items, 1, new Date('2026-11-02T17:00:00Z')), '03112026-001');
+  assert.equal(context.suggestAssetNumbers(items, 2, day), 'ks-02112026-004, ks-02112026-005');
+  assert.equal(context.suggestAssetNumbers(items, 1, new Date('2026-11-02T17:00:00Z')), 'ks-03112026-001');
+  assert.equal(context.suggestAssetNumbers([...items, { asset_number: 'ks-02112026-007' }, { asset_number: 'KS-02112026-009' }], 1, day), 'ks-02112026-010');
   assert.equal(JSON.stringify(items), snapshot);
 });
 
