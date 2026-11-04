@@ -1,6 +1,6 @@
 const { currentUser, readJson, send, serviceSupabase } = require('./_internal-auth');
 
-const ADMIN_EMAILS = new Set(['uthumporn.p@kumtsu.com', 'pachara.r@kumtsu.com']);
+const ADMIN_EMAILS = new Set(['uthumporn.p@kumtsu.com', 'pachara.r@kumtsu.com', 'krissana.s@kumtsu.com']);
 const STATUSES = new Set(['waiting', 'progress', 'overdue', 'approval', 'completed', 'cancelled']);
 const TECHNICIANS = new Set(['นอส', 'เอฟ', 'ขวัญ']);
 const OTHER_BRANCH = 'สาขาอื่นๆ';

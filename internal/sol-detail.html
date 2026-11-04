@@ -24,6 +24,7 @@ aside{position:sticky;top:78px;align-self:start;max-height:calc(100vh - 100px);o
 <script>
 (async () => {
 const ADMIN_EMAIL = 'pachara.r@kumtsu.com';
+const ADMIN_EMAILS = Object.freeze([ADMIN_EMAIL, 'krissana.s@kumtsu.com']);
 const isLocalPreview = location.protocol === 'file:';
 let canAdminEdit = false;
 
@@ -32,7 +33,7 @@ if (!isLocalPreview) {
   if (!requireSession()) throw new Error('Authentication required');
   const { response: accessResponse, data: accessData } = await api('/api/internal-dashboard');
   if (!accessResponse.ok) throw new Error(accessData.message || 'ไม่สามารถตรวจสอบสิทธิ์ผู้ใช้งานได้');
-  canAdminEdit = String(accessData.user?.email || accessData.profile?.email || '').toLowerCase() === ADMIN_EMAIL;
+  canAdminEdit = ADMIN_EMAILS.includes(String(accessData.user?.email || accessData.profile?.email || '').trim().toLowerCase());
 }
 document.querySelector('#admin').hidden = !canAdminEdit;
 

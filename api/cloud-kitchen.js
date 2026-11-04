@@ -2,7 +2,7 @@ const crypto = require('node:crypto');
 const { currentUser, readJson, send, serviceSupabase } = require('./_internal-auth');
 const seed = require('./_cloud-kitchen-seed.json');
 
-const ADMIN_EMAILS = new Set(['pachara.r@kumtsu.com', 'ruttapong.k@kumtsu.com']);
+const ADMIN_EMAILS = new Set(['pachara.r@kumtsu.com', 'ruttapong.k@kumtsu.com', 'krissana.s@kumtsu.com']);
 const BUCKET = 'cloud-kitchen-documents';
 const DOCUMENT_TYPES = new Set(['contract', 'payment', 'other']);
 const email = (value) => String(value || '').trim().toLowerCase();

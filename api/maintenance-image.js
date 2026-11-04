@@ -1,7 +1,7 @@
 const crypto = require('node:crypto');
 const { currentUser, readJson, send, serviceSupabase } = require('./_internal-auth');
 
-const ADMIN_EMAILS = new Set(['uthumporn.p@kumtsu.com', 'pachara.r@kumtsu.com']);
+const ADMIN_EMAILS = new Set(['uthumporn.p@kumtsu.com', 'pachara.r@kumtsu.com', 'krissana.s@kumtsu.com']);
 const MIME_EXTENSIONS = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
 const BUCKET = 'maintenance-closeouts';
 function email(value) { return String(value || '').trim().toLowerCase(); }
