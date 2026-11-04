@@ -107,6 +107,13 @@ test('only IT managers may issue batches or close jobs with equipment', async ()
   }
 });
 
+test('Card 07 retains Krissana editing and equipment-management rights', async () => {
+  const result = await inventoryRequest({ action: 'issue-stock', jobId: 7, items: [{ inventoryItemId: 4, quantity: 1 }] }, 'POST', false, { actor: 'krissana.s@kumtsu.com' });
+  assert.equal(result.status, 200);
+  assert.equal(result.calls.length, 1);
+  assert.equal(result.saved.p_actor_email, 'krissana.s@kumtsu.com');
+});
+
 function assetNumberContext() {
   const source = fs.readFileSync(require.resolve('../internal/it-service.js'), 'utf8');
   const nodes = { inventoryId: { value: '' }, inventoryAssetNumber: { value: '' }, inventoryQuantity: { value: '1' } };

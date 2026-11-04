@@ -3,6 +3,7 @@ const { currentUser, send, serviceSupabase, supabase } = require('./_internal-au
 const { BRAND_OPTIONS, CHANNEL_OPTIONS, brandCode, isFoodstory } = require('../internal/branch-access-catalog');
 
 const ADMIN_EMAIL = 'pachara.r@kumtsu.com';
+const ADMIN_EMAILS = Object.freeze([ADMIN_EMAIL, 'krissana.s@kumtsu.com']);
 const TABLES = {
   branch: {
     table: 'branch_access_branches',
@@ -61,7 +62,7 @@ async function requireActiveUser(req, res) {
     send(res, 403, { message: 'บัญชีนี้ยังไม่ได้รับอนุมัติให้ใช้งาน' });
     return null;
   }
-  return { auth, profile, canEdit: normalizedEmail(auth.user.email || profile.email) === ADMIN_EMAIL };
+  return { auth, profile, canEdit: ADMIN_EMAILS.includes(normalizedEmail(auth.user.email || profile.email)) };
 }
 
 async function readTable(path, { allowMissing = false, allowMissingPin = false } = {}) {
@@ -143,6 +144,7 @@ function cleanCreate(entity, input, context = {}) {
 
 module.exports = {
   ADMIN_EMAIL,
+  ADMIN_EMAILS,
   TABLES,
   cleanCreate,
   cleanChanges,

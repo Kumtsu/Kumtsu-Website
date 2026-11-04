@@ -5,10 +5,11 @@ const path = require('node:path');
 const cloudKitchen = require('../api/cloud-kitchen');
 const seed = require('../api/_cloud-kitchen-seed.json');
 
-test('Card 08 admin emails are normalized and restricted to the two configured accounts', () => {
+test('Card 08 admin emails are normalized and restricted to the three configured accounts', () => {
   assert.equal(cloudKitchen._test.email(' Ruttapong.K@KUMTSU.COM '), 'ruttapong.k@kumtsu.com');
-  assert.deepEqual([...cloudKitchen._test.ADMIN_EMAILS].sort(), ['pachara.r@kumtsu.com','ruttapong.k@kumtsu.com']);
+  assert.deepEqual([...cloudKitchen._test.ADMIN_EMAILS].sort(), ['krissana.s@kumtsu.com','pachara.r@kumtsu.com','ruttapong.k@kumtsu.com']);
   assert.equal(cloudKitchen._test.canManageEmail(' PACHARA.R@KUMTSU.COM '), true);
+  assert.equal(cloudKitchen._test.canManageEmail(' KRISSANA.S@KUMTSU.COM '), true);
   assert.equal(cloudKitchen._test.canManageEmail('viewer@kumtsu.com'), false);
 });
 

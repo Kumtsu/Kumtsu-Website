@@ -11,7 +11,7 @@ test('encrypts and decrypts credentials without storing plaintext', () => {
   assert.equal(decryptSecret(encrypted), plaintext);
 });
 
-test('normalizes the one designated admin email', () => {
+test('normalizes the original designated admin email', () => {
   assert.equal(normalizedEmail(' Pachara.R@KUMTSU.COM '), ADMIN_EMAIL);
   assert.notEqual(normalizedEmail('another@kumtsu.com'), ADMIN_EMAIL);
 });
