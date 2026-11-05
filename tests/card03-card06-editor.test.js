@@ -30,11 +30,22 @@ function harness(route, {
     if (url.startsWith('/rest/v1/maintenance_technicians?')) return ok(technicianKey ? [{ technician_key: technicianKey }] : []);
     if (method === 'GET' && url.startsWith('/rest/v1/maintenance_jobs?')) return ok([job]);
     if (method === 'GET' && url.startsWith('/rest/v1/maintenance_job_attachments?')) return ok(attachmentsPresent ? [{ id: 1, job_id: 1, bucket_id: 'maintenance-closeouts', object_path: '1/fixture.jpg' }] : []);
-    if (method === 'GET' && url.startsWith('/rest/v1/rfd_feedback_workflow?')) return ok();
+    if (method === 'GET' && url.startsWith('/rest/v1/rfd_feedback_workflow?')) {
+      const requested = new URL(url, 'https://unit.test').searchParams.get('review_id');
+      return ok([{
+        review_id: requested ? requested.slice(3) : dashboardData.records[0].id,
+        status: 'needs_improvement', revision: 0, action_plan: '', action_result: '', evidence: [],
+      }]);
+    }
     if (url.startsWith('/storage/v1/object/sign/')) return ok({ signedURL: '/signed-test-image' });
     if (['POST', 'PATCH', 'DELETE'].includes(method)) {
       const body = typeof options.body === 'string' ? JSON.parse(options.body) : options.body;
       writes.push({ url, method, body });
+      if (url === '/rest/v1/rpc/rfd_apply_feedback_action') return ok({
+        review_id: body.p_review_id, status: body.p_action === 'save_progress' ? 'in_progress' : body.p_status,
+        action_plan: body.p_plan || '', action_result: body.p_result || '', evidence: [],
+        revision: body.p_expected_revision + 1, updated_by_email: body.p_actor_email,
+      });
       if (url === '/rest/v1/rpc/complete_maintenance_job') return ok([{ ...job, status: 'completed' }]);
       if (url.startsWith('/storage/v1/object/')) return ok({ Key: 'fixture.jpg' });
       return ok([{ id: 1, ...body }]);
@@ -46,6 +57,7 @@ function harness(route, {
   vm.runInNewContext(source, {
     module,
     Buffer,
+    URL,
     console,
     require(name) {
       if (name === './_internal-auth') return {
@@ -79,17 +91,22 @@ test('Card 03 publishes Krissana and Pachara as branch-wide operations managers'
   assert.equal(res.body.areaManagers.length, dashboardData.areaManagers.length + 2);
 });
 
-test('Card 03 lets Krissana update feedback across different branches with normalized email', async () => {
+test('Card 03 lets Krissana record progress across different branches with normalized email', async () => {
   const first = dashboardData.records[0];
   const other = dashboardData.records.find((record) => record.branch !== first.branch);
   assert.ok(other);
   for (const record of [first, other]) {
     const h = harness('rating-feedback', { email: 'KRISSANA.S@KUMTSU.COM' });
     const res = response();
-    await h.handler({ method: 'PUT', body: { reviewId: record.id, status: 'in_progress' } }, res);
+    await h.handler({ method: 'PUT', body: {
+      reviewId: record.id, action: 'save_progress', plan: 'ตรวจทวนขั้นตอนประจำสาขา', expectedRevision: 0,
+    } }, res);
     assert.equal(res.statusCode, 200);
+    assert.equal(res.body.issue.status, 'in_progress');
     assert.equal(res.body.issue.updatedBy, 'krissana.s@kumtsu.com');
-    assert.ok(h.writes.some(({ url, body }) => url.startsWith('/rest/v1/rfd_feedback_workflow?') && body.updated_by_email === 'krissana.s@kumtsu.com'));
+    assert.ok(h.writes.some(({ url, body }) => url === '/rest/v1/rpc/rfd_apply_feedback_action'
+      && body.p_actor_email === 'krissana.s@kumtsu.com' && body.p_action === 'save_progress'
+      && body.p_expected_revision === 0));
   }
 });
 
@@ -102,9 +119,23 @@ test('Card 03 preserves Pachara editing and rejects ordinary, pending, and logge
   ]) {
     const h = harness('rating-feedback', options);
     const res = response();
-    await h.handler({ method: 'PUT', body: { reviewId: dashboardData.records[0].id, status: 'resolved' } }, res);
+    await h.handler({ method: 'PUT', body: {
+      reviewId: dashboardData.records[0].id, action: 'save_progress', plan: 'ตรวจทวนขั้นตอนประจำสาขา', expectedRevision: 0,
+    } }, res);
     assert.equal(res.statusCode, expected);
     if (expected !== 200) assert.equal(h.writes.length, 0);
+  }
+});
+
+test('Card 03 operations managers cannot bypass Sittichok approval by setting resolved directly', async () => {
+  for (const email of ['pachara.r@kumtsu.com', 'krissana.s@kumtsu.com']) {
+    const h = harness('rating-feedback', { email });
+    const res = response();
+    await h.handler({ method: 'PUT', body: {
+      reviewId: dashboardData.records[0].id, action: 'set_status', status: 'resolved', expectedRevision: 0,
+    } }, res);
+    assert.equal(res.statusCode, 403);
+    assert.equal(h.writes.length, 0);
   }
 });
 
